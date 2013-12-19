@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{fc55703e-f950-4101-be5a-1e39ca7ded99}</ProjectGuid>
+    <ProjectGuid>{FC55703E-F950-4101-BE5A-1E39CA7DED99}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MarkMaster</RootNamespace>
@@ -14,9 +14,7 @@
     <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    
     <PackageCertificateKeyFile>MarkMaster_TemporaryKey.pfx</PackageCertificateKeyFile>
-    
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -117,7 +115,7 @@
       <DependentUpon>SplitPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DataModel\SampleDataSource.cs" />
+    <Compile Include="DataModel\GradesDataSource.cs" />
     <Compile Include="Common\RelayCommand.cs" />
     <Compile Include="Common\ObservableDictionary.cs" />
     <Compile Include="Common\NavigationHelper.cs" />
@@ -128,10 +126,8 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="Common\ReadMe.txt" />
-    
     <None Include="MarkMaster_TemporaryKey.pfx" />
-    
-    <Content Include="DataModel\SampleData.json"/>
+    <Content Include="DataModel\GradesData.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Logo.scale-100.png" />

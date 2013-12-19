@@ -67,7 +67,7 @@ namespace MarkMaster
         private async void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
-            var sampleDataGroups = await SampleDataSource.GetGroupsAsync();
+            var sampleDataGroups = await GradesDataSource.GetGroupsAsync();
             this.DefaultViewModel["Items"] = sampleDataGroups;
         }
 
@@ -81,7 +81,7 @@ namespace MarkMaster
         {
             // Navigate to the appropriate destination page, configuring the new page
             // by passing required information as a navigation parameter
-            var groupId = ((SampleDataGroup)e.ClickedItem).UniqueId;
+            var groupId = ((GradesDataGroup)e.ClickedItem).UniqueId;
             this.Frame.Navigate(typeof(SplitPage), groupId);
         }
 

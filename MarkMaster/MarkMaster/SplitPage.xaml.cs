@@ -79,7 +79,7 @@ namespace MarkMaster
         /// session.  The state will be null the first time a page is visited.</param>
         private async void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            var group = await SampleDataSource.GetGroupAsync((String)e.NavigationParameter);
+            var group = await GradesDataSource.GetGroupAsync((String)e.NavigationParameter);
             this.DefaultViewModel["Group"] = group;
             this.DefaultViewModel["Items"] = group.Items;
 
@@ -98,7 +98,7 @@ namespace MarkMaster
                 // Restore the previously saved state associated with this page
                 if (e.PageState.ContainsKey("SelectedItem") && this.itemsViewSource.View != null)
                 {
-                    var selectedItem = await SampleDataSource.GetItemAsync((String)e.PageState["SelectedItem"]);
+                    var selectedItem = await GradesDataSource.GetItemAsync((String)e.PageState["SelectedItem"]);
                     this.itemsViewSource.View.MoveCurrentTo(selectedItem);
                 }
             }
@@ -119,7 +119,7 @@ namespace MarkMaster
         {
             if (this.itemsViewSource.View != null)
             {
-                var selectedItem = (Data.SampleDataItem)this.itemsViewSource.View.CurrentItem;
+                var selectedItem = (Data.GradesDataItem)this.itemsViewSource.View.CurrentItem;
                 if (selectedItem != null) e.PageState["SelectedItem"] = selectedItem.UniqueId;
             }
         }

@@ -16,7 +16,7 @@
         <CollectionViewSource
             x:Name="itemsViewSource"
             Source="{Binding Items}"
-            d:Source="{Binding Groups[0].Items, Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}"/>
+            d:Source="{Binding Groups[0].Items, Source={d:DesignData Source=/DataModel/GradesData.json, Type=data:GradesDataSource}}"/>
     </Page.Resources>
 
     <!--
@@ -26,7 +26,7 @@
     -->
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
         DataContext="{Binding Group}"
-        d:DataContext="{Binding Groups[0], Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}">
+        d:DataContext="{Binding Groups[0], Source={d:DesignData Source=/DataModel/GradesData.json, Type=data:GradesDataSource}}">
         <Grid.ChildrenTransitions>
             <TransitionCollection>
                 <EntranceThemeTransition/>
@@ -102,7 +102,7 @@
             Grid.RowSpan="2"
             Padding="60,0,66,0"
             DataContext="{Binding SelectedItem, ElementName=itemListView}"
-            d:DataContext="{Binding Groups[0].Items[0], Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}"
+            d:DataContext="{Binding Groups[0].Items[0], Source={d:DesignData Source=/DataModel/GradesData.json, Type=data:GradesDataSource}}"
             HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
             ScrollViewer.HorizontalScrollMode="Disabled" ScrollViewer.VerticalScrollMode="Enabled"
             ScrollViewer.ZoomMode="Disabled">
