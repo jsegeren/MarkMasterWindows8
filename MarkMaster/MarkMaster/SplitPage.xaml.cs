@@ -28,6 +28,7 @@ namespace MarkMaster
     {
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
+        private bool isEditingFlag = false; // Flag indicating whether user is editing course fields
 
         /// <summary>
         /// NavigationHelper is used on each page to aid in navigation and 
@@ -80,8 +81,10 @@ namespace MarkMaster
         private async void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             var group = await GradesDataSource.GetGroupAsync((String)e.NavigationParameter);
+            //GradesDataGroup group = GradesDataSource.GetGroup((String)e.NavigationParameter);
             this.DefaultViewModel["Group"] = group;
             this.DefaultViewModel["Items"] = group.Items;
+            this.DefaultViewModel["IsEditingFlag"] = isEditingFlag;
 
             if (e.PageState == null)
             {

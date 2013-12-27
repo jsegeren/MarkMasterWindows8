@@ -2,6 +2,7 @@
 using MarkMaster.Data;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -66,9 +67,14 @@ namespace MarkMaster
         /// session.  The state will be null the first time a page is visited.</param>
         private async void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            // TODO: Create an appropriate data model for your problem domain to replace the sample data
-            var sampleDataGroups = await GradesDataSource.GetGroupsAsync();
-            this.DefaultViewModel["Items"] = sampleDataGroups;
+            //ObservableCollection<GradesDataGroup> sampleDataGroups = 
+                //(ObservableCollection<GradesDataGroup>) await GradesDataSource.GetGroupsAsync();
+            GradesDataSource gradesDataSource = (GradesDataSource) await GradesDataSource.GetDataSourceAsync();
+
+            // Add final element representing new/add course button
+            //this.DefaultViewModel["Courses"] = sampleDataGroups;
+            this.DefaultViewModel["Courses"] = (ObservableCollection<GradesDataGroup>) gradesDataSource.Groups;
+            this.DefaultViewModel["SessionalGrade"] = gradesDataSource.SessionalGrade;
         }
 
         /// <summary>
@@ -107,5 +113,21 @@ namespace MarkMaster
         }
 
         #endregion
+
+         //Launch the pop-up window! 
+        private void OnAddCourseButtonClick(object sender, RoutedEventArgs e)
+        {
+            string uniqueID = GradesDataSource.CreateNewCourse();
+            this.Frame.Navigate(typeof(SplitPage), uniqueID);
+        }
+
+        //private void OnClosePopupClick(object sender, RoutedEventArgs e)
+        //{
+        //    if (AddCoursePopup.IsOpen) { 
+        //        AddCoursePopup.IsOpen = false;
+        //        this.Opacity = 1.0;
+        //    }
+        //}
+
     }
 }

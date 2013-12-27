@@ -15,8 +15,9 @@
         <!-- Collection of items displayed by this page -->
         <CollectionViewSource
             x:Name="itemsViewSource"
-            Source="{Binding Items}"
+            Source="{Binding Courses}"
             d:Source="{Binding Groups, Source={d:DesignData Source=/DataModel/GradesData.json, Type=data:GradesDataSource}}"/>
+        <common:StringFormatter x:Key="StringConverter"/>
     </Page.Resources>
 
     <!--
@@ -24,7 +25,9 @@
         * Row 0 contains the back button and page title
         * Row 1 contains the rest of the page layout
     -->
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid
+        d:DataContext="{Binding SessionalGrade, Source={d:DesignData Source=85.5, Type=data:GradesDataSource}}"
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.ChildrenTransitions>
             <TransitionCollection>
                 <EntranceThemeTransition/>
@@ -34,6 +37,17 @@
             <RowDefinition Height="140"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" x:Name="courseGradePanel" Margin="50,10,20,20" VerticalAlignment="Stretch">
+            <TextBlock x:Name="sessionalGradeLabel" Margin="0,10,10,10" Text="Sessional Average" Style="{StaticResource SubtitleTextBlockStyle}" FontSize="20"/>
+            <TextBlock x:Name="sessionalGrade" Margin="0,100,0,0" Text="{Binding SessionalGrade, 
+                                Converter={StaticResource StringConverter}, 
+                                ConverterParameter=\{0:0.00\}}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="100" FontWeight="Light" FontFamily="Global User Interface" />
+        </StackPanel>
 
         <!-- Horizontal scrolling grid -->
         <GridView
@@ -42,21 +56,33 @@
             AutomationProperties.Name="Items"
             TabIndex="1"
             Grid.RowSpan="2"
-            Padding="116,136,116,46"
+            Grid.Column="1"
+            Padding="50,140,50,50"
             ItemsSource="{Binding Source={StaticResource itemsViewSource}}"
             SelectionMode="None"
-            IsSwipeEnabled="false"
+            IsSwipeEnabled="True"
             IsItemClickEnabled="True"
             ItemClick="ItemView_ItemClick">
             <GridView.ItemTemplate>
                 <DataTemplate>
-                    <Grid HorizontalAlignment="Left" Width="250" Height="250">
-                        <Border Background="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}">
-                            <Image Source="{Binding ImagePath}" Stretch="UniformToFill" AutomationProperties.Name="{Binding Title}"/>
+                    <Grid HorizontalAlignment="Left" Width="250" Height="400">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="177*"/>
+                            <RowDefinition Height="98*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Background="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}" Grid.RowSpan="2">
+                            <Image Source="{Binding ImagePath}" Stretch="UniformToFill"  AutomationProperties.Name="{Binding CourseName}"/>
                         </Border>
-                        <StackPanel VerticalAlignment="Bottom" Background="{ThemeResource ListViewItemOverlayBackgroundThemeBrush}">
-                            <TextBlock Text="{Binding Title}" Foreground="{ThemeResource ListViewItemOverlayForegroundThemeBrush}" Style="{StaticResource BaseTextBlockStyle}" Height="60" Margin="15,0,15,0" FontWeight="SemiBold"/>
-                            <TextBlock Text="{Binding Subtitle}" Foreground="{ThemeResource ListViewItemOverlaySecondaryForegroundThemeBrush}" Style="{StaticResource BaseTextBlockStyle}" TextWrapping="NoWrap" Margin="15,0,15,10" FontSize="12"/>
+                        <StackPanel Grid.Row="2" VerticalAlignment="Bottom" Background="{ThemeResource ListViewItemOverlayBackgroundThemeBrush}">
+                            <TextBlock Text="{Binding CourseName}" Foreground="{ThemeResource ListViewItemOverlayForegroundThemeBrush}" Style="{StaticResource BaseTextBlockStyle}" Height="30" Margin="15,5,15,0" FontWeight="SemiBold" FontSize="20" FontFamily="Global User Interface"/>
+                            <TextBlock Text="{Binding CourseCode}" Foreground="{ThemeResource ListViewItemOverlaySecondaryForegroundThemeBrush}" Style="{StaticResource BaseTextBlockStyle}" TextWrapping="NoWrap" Margin="15,0,15,10" FontSize="16"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Background="{ThemeResource ListViewItemOverlayBackgroundThemeBrush}">
+                            <TextBlock Text="{Binding CourseGrade, 
+                                Converter={StaticResource StringConverter}, 
+                                ConverterParameter=\{0:0.00\}}" HorizontalAlignment="Right" Foreground="{ThemeResource ListViewItemOverlayForegroundThemeBrush}" Style="{StaticResource SubheaderTextBlockStyle}" Margin="15,15,15,15" FontSize="50" FontFamily="Global User Interface" />
                         </StackPanel>
                     </Grid>
                 </DataTemplate>
@@ -64,19 +90,42 @@
         </GridView>
 
         <!-- Back button and page title -->
-        <Grid>
+        <Grid Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
+                <!--<ColumnDefinition Width="120"/>-->
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="backButton" Margin="39,59,39,0" Command="{Binding NavigationHelper.GoBackCommand, ElementName=pageRoot}"
+            <!--<Button x:Name="backButton" Margin="39,59,39,0" Command="{Binding NavigationHelper.GoBackCommand, ElementName=pageRoot}"
                         Style="{StaticResource NavigationBackButtonNormalStyle}"
                         VerticalAlignment="Top"
                         AutomationProperties.Name="Back"
                         AutomationProperties.AutomationId="BackButton"
-                        AutomationProperties.ItemType="Navigation Button"/>
+                        AutomationProperties.ItemType="Navigation Button"/>-->
             <TextBlock x:Name="pageTitle" Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
-                        IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
+                        IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="50,0,30,40"/>
         </Grid>
+
+        <!--<ContentControl x:Name="PopupContainer" Height="650" Margin="0,250,0,140">
+            <Popup x:Name="AddCoursePopup" IsLightDismissEnabled="False">
+                <Popup.ChildTransitions>
+                    <TransitionCollection>
+                        <PopupThemeTransition />
+                    </TransitionCollection>
+                </Popup.ChildTransitions>
+                <StackPanel x:Name="PopupStackPanel" Orientation="Vertical" Background="{StaticResource ListViewItemOverlayBackgroundThemeBrush}"
+                            HorizontalAlignment="Center" VerticalAlignment="Stretch">
+                    <TextBlock Text="Simple Popup" FontSize="24.667" HorizontalAlignment="Center" />
+                    <Button Content="Close" Click="OnClosePopupClick" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Popup>
+        </ContentControl>-->
     </Grid>
+
+    <Page.BottomAppBar>
+        <AppBar>
+            <StackPanel Orientation="Horizontal">
+                <AppBarButton Label="Add Course" Icon="Add" Click="OnAddCourseButtonClick"/>
+            </StackPanel>
+        </AppBar>
+    </Page.BottomAppBar>
 </Page>
