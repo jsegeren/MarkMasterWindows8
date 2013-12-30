@@ -3,11 +3,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:MarkMaster"
-    xmlns:localData="using:MarkMaster.Data">
-
+    xmlns:localData="using:MarkMaster.Data"
+    xmlns:common="using:MarkMaster.Common">
     <Application.Resources>
 
         <!-- Application-specific resources -->
         <x:String x:Key="AppName">MarkMaster</x:String>
+        <common:StringFormatter x:Key="StringConverter"/>
+        <common:BooleanToVisibilityConverter x:Key="TrueToVisibilityConverter" />
+        <common:BooleanToVisibilityConverter x:Key="FalseToVisibilityConverter" IsReversed="True"/>
     </Application.Resources>
 </Application>

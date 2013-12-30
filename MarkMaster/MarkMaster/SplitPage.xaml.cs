@@ -6,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Input;
+using Windows.ApplicationModel;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -28,7 +30,7 @@ namespace MarkMaster
     {
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
-        private bool isEditingFlag = false; // Flag indicating whether user is editing course fields
+        private String subjectSearchString;
 
         /// <summary>
         /// NavigationHelper is used on each page to aid in navigation and 
@@ -63,8 +65,10 @@ namespace MarkMaster
 
             // Start listening for Window size changes 
             // to change from showing two panes to showing a single pane
-            Window.Current.SizeChanged += Window_SizeChanged;
+            // TODO fix and finish this
+            //Window.Current.SizeChanged += Window_SizeChanged;
             this.InvalidateVisualState();
+
         }
 
         /// <summary>
@@ -80,11 +84,19 @@ namespace MarkMaster
         /// session.  The state will be null the first time a page is visited.</param>
         private async void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
+            // Set up elements of view model
             var group = await GradesDataSource.GetGroupAsync((String)e.NavigationParameter);
+            GradesDataSource gradesDataSource = (GradesDataSource)await GradesDataSource.GetDataSourceAsync();
             //GradesDataGroup group = GradesDataSource.GetGroup((String)e.NavigationParameter);
             this.DefaultViewModel["Group"] = group;
             this.DefaultViewModel["Items"] = group.Items;
-            this.DefaultViewModel["IsEditingFlag"] = isEditingFlag;
+            this.DefaultViewModel["IsEditingFlag"] = gradesDataSource.IsEditingFlag;
+
+            // Populate the combobox with cached list of subjects
+            var courseSubjectFile = await
+                Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Subjects_McMaster_Jan_2014.csv");
+            IList<string> courseSubjects = await FileIO.ReadLinesAsync(courseSubjectFile);
+            courseCodeEdit.ItemsSource = courseSubjects;
 
             if (e.PageState == null)
             {
@@ -171,6 +183,13 @@ namespace MarkMaster
             // to showing the selected item's details.  When the selection is cleared this has the
             // opposite effect.
             if (this.UsingLogicalPageNavigation()) this.InvalidateVisualState();
+
+            // Prevent no item from being selected i.e. disable deselection
+            // (Assumes only one course item was previously selected, i.e. not multiple items at a time!)
+            if (this.itemListView.SelectedItem == null)
+            {
+                this.itemListView.SelectedIndex = this.itemListView.Items.IndexOf(e.RemovedItems.FirstOrDefault());
+            }
         }
 
         private bool CanGoBack()
@@ -249,5 +268,136 @@ namespace MarkMaster
         }
 
         #endregion
+
+        private void OnEditFieldsClick(object sender, RoutedEventArgs e)
+        {
+            // TODO Figure out why the view is not aware that the value of the boolean flag has changed
+            if (GradesDataSource.SwitchIsEditingFlag())
+            {
+                pageTitle.Visibility = Visibility.Collapsed;
+                pageTitleEdit.Visibility = Visibility.Visible;
+
+                courseCode.Visibility = Visibility.Collapsed;
+                courseCodeEditPanel.Visibility = Visibility.Visible;
+
+                itemTitle.Visibility = Visibility.Collapsed;
+                itemTitleEdit.Visibility = Visibility.Visible;
+
+                itemSubtitle.Visibility = Visibility.Collapsed;
+                itemSubtitleEdit.Visibility = Visibility.Visible;
+
+                itemWeightValue.Visibility = Visibility.Collapsed;
+                itemWeightValueEdit.Visibility = Visibility.Visible;
+
+                itemGradeValue.Visibility = Visibility.Collapsed;
+                itemGradeValueEdit.Visibility = Visibility.Visible;
+            }
+
+            else
+            {
+                pageTitle.Visibility = Visibility.Visible;
+                pageTitleEdit.Visibility = Visibility.Collapsed;
+
+                courseCode.Visibility = Visibility.Visible;
+                courseCodeEditPanel.Visibility = Visibility.Collapsed;
+
+                itemTitle.Visibility = Visibility.Visible;
+                itemTitleEdit.Visibility = Visibility.Collapsed;
+
+                itemSubtitle.Visibility = Visibility.Visible;
+                itemSubtitleEdit.Visibility = Visibility.Collapsed;
+
+                itemWeightValue.Visibility = Visibility.Visible;
+                itemWeightValueEdit.Visibility = Visibility.Collapsed;
+
+                itemGradeValue.Visibility = Visibility.Visible;
+                itemGradeValueEdit.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void OnAddItemClick(object sender, RoutedEventArgs e)
+        {
+            // Add new item to current course
+            string uniqueID = GradesDataSource.CreateNewItem(((GradesDataGroup)this.DefaultViewModel["Group"]).UniqueId);
+            itemListView.SelectedIndex = itemListView.Items.Count - 1;
+
+            itemTitleEdit.Focus(FocusState.Programmatic); // Set the user input focus to the new item label
+        }
+
+        private void OnRemoveItemClick(object sender, RoutedEventArgs e)
+        {
+            GradesDataSource.RemoveItem(((GradesDataGroup)this.DefaultViewModel["Group"]).UniqueId, (GradesDataItem) itemListView.SelectedItem);
+
+            if (itemListView.Items.Count == 0)
+            {
+                string uniqueID = GradesDataSource.CreateNewItem(((GradesDataGroup)this.DefaultViewModel["Group"]).UniqueId);
+            }
+
+            itemListView.SelectedIndex = itemListView.Items.Count - 1; // Make sure some item is still selected
+        }
+
+        private void courseCodeEdit_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.SetCourseCodeInput();
+            //courseCodeEdit2.Focus(FocusState.Programmatic); // Progress input focus over to code suffix
+
+            // Reset the search input buffer
+            subjectSearchString = String.Empty;
+        }
+
+        private void courseCodeEdit2_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            this.SetCourseCodeInput();
+        }
+
+        private void SetCourseCodeInput()
+        {
+            // Set text value of course code text to string of selected element in course code list (combobox)
+            if (courseCodeEdit.SelectedValue != null && !String.IsNullOrEmpty(courseCodeEdit.SelectedValue.ToString()))
+            {
+                courseCode.Text = courseCodeEdit.SelectedValue.ToString();
+            }
+            if (!String.IsNullOrEmpty(courseCodeEdit2.Text.ToString()))
+            {
+                courseCode.Text = (courseCodeEdit.SelectedValue == null || String.IsNullOrEmpty(courseCodeEdit.SelectedValue.ToString())) ?
+                    courseCodeEdit2.Text.ToString() : courseCode.Text + " " + courseCodeEdit2.Text.ToString();
+            }
+        }
+
+        // TODO fix this -> need to subscribe to key up on underlying scrollviewer; allow more complex searches
+        private void courseCodeEdit_KeyUp(object sender, KeyRoutedEventArgs e)
+        {
+            subjectSearchString = String.Join(String.Empty, e.Key.ToString());
+            var subjectMatch = ((ComboBox)sender).Items.FirstOrDefault(subject => 
+                ((string)subject).StartsWith(subjectSearchString, StringComparison.CurrentCultureIgnoreCase));
+            if (subjectMatch != null)
+            {
+                ((ComboBox)sender).SelectedItem = subjectMatch;
+                ((ComboBox)sender).IsDropDownOpen = true;
+            }
+        }
+
+        private void itemWeightValueEdit_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (!(char.IsDigit((char) e.Key) || ( Char.Equals((char) e.Key, (char) 190) && !((TextBox)sender).Text.Contains('.') ))) {
+                e.Handled = true;
+                return;
+            }
+
+            double nextValue;
+            if (Char.Equals((char) e.Key, (char) 190)) {
+                nextValue = Double.Parse((string) ((TextBox)sender).Text.ToString() + ".");
+            }
+            else {
+                nextValue = Double.Parse((string) ((TextBox)sender).Text.ToString() + Convert.ToChar(e.Key));
+            }
+
+            if (nextValue > 100.0 || nextValue < 0.0)
+            {
+                e.Handled = true;
+            }
+
+        }
+
     }
 }

@@ -26,6 +26,7 @@ TODO:
 	- Implement seralization/deserialization of grade information so app state can be maintained across user sessions
 	- Allow deletion / edit fields for courses, and course items
 		- Prompt for confirmation before deletion of more than one item at a time
+	- For course name, use dropbox, and retrieve list of courses from official McMaster website
 
 BUG LOG:
 	?? (None so far?)

@@ -1,5 +1,5 @@
 ﻿using MarkMaster.Common;
-
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -16,6 +17,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Web.Http;
 
 // The Split App template is documented at http://go.microsoft.com/fwlink/?LinkId=234228
 
@@ -26,6 +28,46 @@ namespace MarkMaster
     /// </summary>
     sealed partial class App : Application
     {
+
+        // Shared data - global across app pages
+        private string _courseJSONData;
+
+        public string CourseJSONData
+        {
+            get
+            {
+                return _courseJSONData;
+            }
+            set
+            {
+                _courseJSONData = value;
+            }
+        }
+
+        private async void RetrieveCourseData()
+        {
+            // First retrieve the JSON from the timetable generating website (credits to TODO who?)
+            HttpClient hyperTextClient = new HttpClient();
+            Uri courseDataURL = new Uri("http://www.timetablegenerator.com/data/mcmaster_data.json");
+            HttpResponseMessage hyperTextResponse = await hyperTextClient.GetAsync(courseDataURL);
+
+            if (hyperTextResponse.StatusCode == HttpStatusCode.Ok)
+            {
+                CourseJSONData = await hyperTextResponse.Content.ReadAsStringAsync();
+
+                // Then parse the JSON response
+                var resultItem = JsonConvert.DeserializeObject(CourseJSONData);
+            }
+            else
+            {
+                throw new Exception(hyperTextResponse.StatusCode.ToString() + " " + hyperTextResponse.ReasonPhrase);
+            }
+
+            return;
+            
+        }
+
+
         /// <summary>
         /// Initializes the singleton Application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -94,6 +136,10 @@ namespace MarkMaster
             }
             // Ensure the current window is active
             Window.Current.Activate();
+
+            // Perform initial course data retrieval / parsing
+            // TODO fix and finish implementing this
+            //RetrieveCourseData();
         }
 
         /// <summary>

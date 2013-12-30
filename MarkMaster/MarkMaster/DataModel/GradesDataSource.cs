@@ -34,19 +34,44 @@ namespace MarkMaster.Data
             this.UniqueId = uniqueId;
             this.ItemName = itemName;
             this.ImagePath = imagePath;
+            this.ItemType = itemType;
             this.ItemGrade = itemGrade;
             this.ItemWeight = itemWeight;
         }
 
         // Backing fields for course item properties
+        private string _itemName;
+        private string _itemType;
         private double _itemGrade;
         private double _itemWeight;
 
         // Public properties
         public string UniqueId { get; private set; }
-        public string ItemName { get; private set; }
+        public string ItemName
+        {
+            get
+            {
+                return _itemName;
+            }
+            set
+            {
+                if (SetProperty<string>(ref _itemName, value)) { }
+            }
+        }
+
         public string ImagePath { get; private set; }
-        public string ItemType { get; private set; }
+        public string ItemType
+        {
+            get
+            {
+                return _itemType;
+            }
+            set
+            {
+                if (SetProperty<string>(ref _itemType, value)) { }
+            }
+        }
+
         public double ItemGrade
         {
             get
@@ -112,13 +137,36 @@ namespace MarkMaster.Data
             // Add event to recalculate course grade if any item changes
             this.Items.CollectionChanged += OnItemsCollectionChanged;
         }
+        private string _courseName;
+        private string _courseCode;
         private double _courseGrade;
         private double _courseGoal;
         private UInt16 _courseUnits;
 
         public string UniqueId { get; private set; }
-        public string CourseName { get; private set; }
-        public string CourseCode { get; private set; }
+        public string CourseName
+        {
+            get
+            {
+                return _courseName;
+            }
+            set
+            {
+                if (SetProperty<string>(ref _courseName, value)) { }
+            }
+        }
+        public string CourseCode
+        {
+            get
+            {
+                return _courseCode;
+            }
+
+            set
+            {
+                if (SetProperty<string>(ref _courseCode, value)) { }
+            }
+        }
         public string ImagePath { get; private set; }
         public UInt16 CourseUnits
         {
@@ -173,7 +221,10 @@ namespace MarkMaster.Data
 
         protected void OnItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            foreach (var newItem in args.NewItems) ((GradesDataItem)newItem).PropertyChanged += RecalculateCourseGrade;
+            if (args.NewItems != null)
+            {
+                foreach (var newItem in args.NewItems) ((GradesDataItem)newItem).PropertyChanged += RecalculateCourseGrade;
+            }
         }
 
         protected void OnPropertyChanged(string propertyName)
@@ -192,8 +243,20 @@ namespace MarkMaster.Data
             {
                 //double oldCourseGrade = this.CourseGrade; // Store previous course grade for reference
                 // Retrieve course grade via dot product of weights * grades (all items), divided by total of weights
-                this.CourseGrade = Items.Select(item => item.ItemWeight * item.ItemGrade).Sum() /
-                    Items.Select(item => item.ItemWeight).Sum();
+
+                // Only consider course items with non-zero (positive) weight
+                var itemsNonZeroWeight = Items.Where(item => item.ItemWeight != 0);
+
+                // If filtered result set is empty, avoid zero division error (NaN result!)
+                if (itemsNonZeroWeight.Count() == 0)
+                {
+                    this.CourseGrade = (Double) 0;
+                }
+                else
+                {
+                    this.CourseGrade = itemsNonZeroWeight.Select(item => item.ItemWeight * item.ItemGrade).Sum() /
+                        itemsNonZeroWeight.Select(item => item.ItemWeight).Sum();
+                }
             }
         }
     }
@@ -204,12 +267,38 @@ namespace MarkMaster.Data
     /// GradesDataSource initializes with data read from a static json file included in the 
     /// project.  This provides sample data at both design-time and run-time.
     /// </summary>
-    public sealed class GradesDataSource : INotifyPropertyChanged
+    public class GradesDataSource : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         
         private int _autoUniqueID = 0; // Private field to maintain next auto-incrementing ID
         private double _sessionalGrade;  // Private field to maintain current sessional average
+        private UInt16 _sessionalUnits; // Private field to maintain current sessional units
+        private bool _isEditingFlag; // Private field indicating whether user is editing fields
+
+        public bool IsEditingFlag
+        {
+            get
+            {
+                return _isEditingFlag;
+            }
+            set
+            {
+                if (SetProperty<bool>(ref _isEditingFlag, value)) { }
+            }
+        }
+
+        public UInt16 SessionalUnits
+        {
+            get
+            {
+                return _sessionalUnits;
+            }
+            set
+            {
+                if (SetProperty<UInt16>(ref _sessionalUnits, value)) { }
+            }
+        }
 
         public double SessionalGrade
         {
@@ -299,6 +388,29 @@ namespace MarkMaster.Data
             RecalculateSessionalGrade(); // Calculate initial sessional grade based on file data
         }
 
+        // Static method to generate blank new course item; returns auto-generated unique ID
+        // for subsequent element focus in the list
+        public static string CreateNewItem(string courseUniqueID)
+        {
+            int itemUniqueID = _gradesDataSource._autoUniqueID++;
+            GradesDataItem newItem = new GradesDataItem((itemUniqueID).ToString(),
+                                                        "New Item",
+                                                        String.Empty,
+                                                        String.Empty,
+                                                        (Double)0,
+                                                        (Double)0);
+
+            ((GradesDataGroup) _gradesDataSource.Groups.Where(course => course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Add(newItem);
+            return itemUniqueID.ToString();
+        }
+
+        // Static method to delete a course item (from a specific course); returns true if completed successfully
+        public static bool RemoveItem(string courseUniqueID, GradesDataItem targetItem)
+        {
+            return ((GradesDataGroup)_gradesDataSource.Groups.Where(course => 
+                course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Remove(targetItem);
+        }
+
         // Static method to generate blank new course; returns auto-generated unique ID
         // for subsequent access to the course
         public static string CreateNewCourse()
@@ -327,12 +439,19 @@ namespace MarkMaster.Data
         // Static method to re-evaluate sessional average over all courses for grades data source object
         public static void RecalculateSessionalGrade()
         {
+            // First, update total number of units
+            _gradesDataSource._sessionalUnits = (UInt16) _gradesDataSource.Groups.Select(course => (double)course.CourseUnits).Sum();
             // Retrieve sessional grade via dot product of units * grades (all courses), divided by total of units
             _gradesDataSource._sessionalGrade = _gradesDataSource.Groups.Select(course => course.CourseUnits * course.CourseGrade).Sum() /
-                _gradesDataSource.Groups.Select(course => (double)course.CourseUnits).Sum();
+                (double) _gradesDataSource._sessionalUnits;
         }
 
-        // Static method to retrieve/access current 
+        // Static method to switch editing flag on/off
+        public static bool SwitchIsEditingFlag()
+        {
+            _gradesDataSource.IsEditingFlag = !_gradesDataSource.IsEditingFlag;
+            return _gradesDataSource.IsEditingFlag;
+        }
 
         protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {

@@ -75,6 +75,7 @@ namespace MarkMaster
             //this.DefaultViewModel["Courses"] = sampleDataGroups;
             this.DefaultViewModel["Courses"] = (ObservableCollection<GradesDataGroup>) gradesDataSource.Groups;
             this.DefaultViewModel["SessionalGrade"] = gradesDataSource.SessionalGrade;
+            this.DefaultViewModel["SessionalUnits"] = gradesDataSource.SessionalUnits;
         }
 
         /// <summary>
