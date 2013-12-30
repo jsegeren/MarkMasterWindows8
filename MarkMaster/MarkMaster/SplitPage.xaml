@@ -77,13 +77,15 @@
 
             <StackPanel x:Name="courseDetailPanel" Margin="30,10,20,20" VerticalAlignment="Top">
                 <TextBlock x:Name="courseCodeLabel" Margin="0,10,0,5" Text="Course Code" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <TextBlock x:Name="courseCode" Margin="0,0,0,10" Text="{Binding CourseCode, Mode=TwoWay}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center" FontSize="35" FontFamily="Global User Interface"/>
+                <TextBlock x:Name="courseCode" Margin="0,0,0,10" Text="{Binding CourseCode, Mode=TwoWay}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center" FontSize="35"/>
                 <StackPanel x:Name="courseCodeEditPanel" Margin="0,10,0,10" Orientation="Horizontal" Width="365" Height="40" Visibility="Collapsed">
                     <ComboBox x:Name="courseCodeEdit" Margin="0,0,10,0" Width="250" Height="40" Visibility="Visible" 
-                              SelectionChanged="courseCodeEdit_SelectionChanged" KeyUp="courseCodeEdit_KeyUp"/>
+                              SelectionChanged="courseCodeEdit_SelectionChanged" KeyUp="courseCodeEdit_KeyUp"
+                              Background="{x:Null}" Foreground="White" FontSize="25"/>
                     <!--<ab:AutoCompleteBox x:Name="courseCodeEdit" Margin="0,0,10,0" Width="250" Height="40" Visibility="Visible" />-->
-                    <TextBox x:Name="courseCodeEdit2" Width="115" Height="40" Visibility="Visible" VerticalAlignment="Center" VerticalContentAlignment="Center"
-                             TextChanged="courseCodeEdit2_TextChanged" InputScope="AlphanumericHalfWidth" MaxLength="4"/>
+                    <TextBox x:Name="courseCodeEdit2" Width="90" Height="40" Visibility="Visible" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                             TextChanged="courseCodeEdit2_TextChanged" InputScope="AlphanumericHalfWidth" MaxLength="4"
+                             Background="{x:Null}" Foreground="White" FontSize="25"/>
                 </StackPanel>
                 <TextBlock x:Name="courseUnitsLabel" Margin="0,10,0,5" Text="Course Units" Style="{StaticResource SubtitleTextBlockStyle}"/>
                 <Grid Margin="30,0,30,0">
@@ -101,7 +103,12 @@
                         <ColumnDefinition Width="80"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="courseGoal" Grid.Column="0" Margin="0,10,0,5" Text="{Binding CourseGoal, Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="35" FontFamily="Global User Interface"/>
+                    <TextBlock x:Name="courseGoal" Grid.Column="0" Margin="0,12,0,3" Text="{Binding CourseGoal, 
+                        Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" 
+                               Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="35"/>
+                    <TextBox x:Name="courseGoalEdit" Grid.Column="0" Margin="0,10,0,5" Text="{Binding CourseGoal, Mode=TwoWay}" 
+                             HorizontalAlignment="Left" Visibility="Collapsed" Background="{x:Null}" Foreground="White"
+                             FontSize="25" MaxLength="4" KeyDown="itemWeightValueEdit_KeyDown"/>
                     <Slider Grid.Column="1" Margin="50,0,0,0" VerticalAlignment="Center"
                         Value="{Binding CourseGoal, Mode=TwoWay}" Orientation="Horizontal" SmallChange="0.1" StepFrequency="0.1" IsThumbToolTipEnabled="False" Height="35" Maximum="100" Minimum="0" LargeChange="1" HorizontalAlignment="Stretch" />
                 </Grid>
@@ -131,12 +138,13 @@
             Margin="0,0,0,0"
             Padding="10,10,10,10"
             ItemsSource="{Binding Source={StaticResource itemsViewSource}}"
-            IsSwipeEnabled="False"
+            IsRightTapEnabled="True"
             SelectionChanged="ItemListView_SelectionChanged" 
-            Background="{ThemeResource SearchBoxIMECandidateListSeparatorThemeBrush}" IsRightTapEnabled="False">
+            RightTapped="itemListView_RightTapped"
+            Background="{ThemeResource SearchBoxIMECandidateListSeparatorThemeBrush}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="6">
+                    <Grid Margin="6" IsHitTestVisible="False">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -205,11 +213,12 @@
                 <StackPanel x:Name="itemDetailTitlePanel" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
                     <TextBlock x:Name="itemTitleLabel" Margin="0,10,0,5" Text="Item Name" Style="{StaticResource SubtitleTextBlockStyle}"/>
                     <TextBlock x:Name="itemTitle" Margin="0,0,0,0" Text="{Binding ItemName}" Style="{StaticResource HeaderTextBlockStyle}" FontSize="35"/>
-                    <TextBox x:Name="itemTitleEdit" Margin="0,0,0,0" Text="{Binding ItemName, Mode=TwoWay}" 
-                             Height="40" Visibility="Collapsed"/>
+                    <TextBox x:Name="itemTitleEdit" Margin="0,0,0,0" Text="{Binding ItemName, Mode=TwoWay}" FontSize="25" 
+                             Height="40" Visibility="Collapsed" Background="{x:Null}" Foreground="White"/>
                     <TextBlock x:Name="itemSubtitleLabel" Margin="0,20,0,5" Text="Item Type" Style="{StaticResource SubtitleTextBlockStyle}"/>
                     <TextBlock x:Name="itemSubtitle" Margin="0,0,0,0" Text="{Binding ItemType}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="25"/>
-                    <TextBox x:Name="itemSubtitleEdit" Margin="0,10,0,10" Text="{Binding ItemType, Mode=TwoWay}" Visibility="Collapsed"/>
+                    <TextBox x:Name="itemSubtitleEdit" Margin="0,10,0,10" Text="{Binding ItemType, Mode=TwoWay}" Visibility="Collapsed"
+                             Background="{x:Null}" Foreground="White" FontSize="20"/>
                 </StackPanel>
                 <StackPanel x:Name="itemWeightLabel" Grid.Row="1" Grid.Column="0" Margin="0,0,20,20" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Margin="0,0,0,0" Text="Weight" Style="{StaticResource SubtitleTextBlockStyle}"/>
@@ -217,8 +226,9 @@
                 <StackPanel x:Name="itemWeightValuePanel" Grid.Row="1" Grid.Column="1" Margin="0,0,20,20" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock x:Name="itemWeightValue" Margin="0,0,0,0" Text="{Binding ItemWeight,
                         Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="30"/>
-                    <TextBox x:Name="itemWeightValueEdit" Margin="0,0,0,0" Text="{Binding ItemWeight, Mode=TwoWay}" FontSize="25" 
-                             Visibility="Collapsed" InputScope="Number" KeyDown="itemWeightValueEdit_KeyDown" MaxLength="4" />
+                    <TextBox x:Name="itemWeightValueEdit" Margin="0,0,0,0" Text="{Binding ItemWeight, Mode=TwoWay}"
+                             Visibility="Collapsed" InputScope="Number" KeyDown="itemWeightValueEdit_KeyDown" MaxLength="4" 
+                             Background="{x:Null}" Foreground="White" FontSize="25"/>
                 </StackPanel>
                 <Slider Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,50,0" VerticalAlignment="Center"
                         Value="{Binding ItemWeight, Mode=TwoWay}" Orientation="Horizontal" SmallChange="0.1" StepFrequency="0.1" IsThumbToolTipEnabled="False" />
@@ -229,7 +239,8 @@
                     <TextBlock x:Name="itemGradeValue" Margin="0,0,0,0" Text="{Binding ItemGrade,
                         Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="30"/>
                     <TextBox x:Name="itemGradeValueEdit" Margin="0,0,0,0" Text="{Binding ItemGrade, Mode=TwoWay}" FontSize="25" 
-                             Visibility="Collapsed" InputScope="Number" KeyDown="itemWeightValueEdit_KeyDown" MaxLength="4" />
+                             Visibility="Collapsed" InputScope="Number" KeyDown="itemWeightValueEdit_KeyDown" MaxLength="4" 
+                             Background="{x:Null}" Foreground="White"/>
                 </StackPanel>
                 <Slider Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,50,0" VerticalAlignment="Center"
                         Value="{Binding ItemGrade, Mode=TwoWay}" SmallChange="0.1" StepFrequency="0.1" IsThumbToolTipEnabled="False" />

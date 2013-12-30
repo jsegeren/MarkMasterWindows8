@@ -225,6 +225,9 @@ namespace MarkMaster.Data
             {
                 foreach (var newItem in args.NewItems) ((GradesDataItem)newItem).PropertyChanged += RecalculateCourseGrade;
             }
+
+            PropertyChangedEventArgs newArgs = new PropertyChangedEventArgs("ItemGrade");
+            RecalculateCourseGrade(sender, newArgs); // Recalculate in case items deleted
         }
 
         protected void OnPropertyChanged(string propertyName)

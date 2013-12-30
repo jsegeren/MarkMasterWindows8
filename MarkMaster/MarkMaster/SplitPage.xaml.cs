@@ -280,6 +280,9 @@ namespace MarkMaster
                 courseCode.Visibility = Visibility.Collapsed;
                 courseCodeEditPanel.Visibility = Visibility.Visible;
 
+                courseGoal.Visibility = Visibility.Collapsed;
+                courseGoalEdit.Visibility = Visibility.Visible;
+
                 itemTitle.Visibility = Visibility.Collapsed;
                 itemTitleEdit.Visibility = Visibility.Visible;
 
@@ -300,6 +303,9 @@ namespace MarkMaster
 
                 courseCode.Visibility = Visibility.Visible;
                 courseCodeEditPanel.Visibility = Visibility.Collapsed;
+
+                courseGoal.Visibility = Visibility.Visible;
+                courseGoalEdit.Visibility = Visibility.Collapsed;
 
                 itemTitle.Visibility = Visibility.Visible;
                 itemTitleEdit.Visibility = Visibility.Collapsed;
@@ -397,6 +403,26 @@ namespace MarkMaster
                 e.Handled = true;
             }
 
+        }
+
+        private void itemListView_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            BottomAppBar.IsOpen = true;
+
+            int item = 0;
+            Double coY = e.GetPosition((UIElement)sender).Y;
+
+            ListView listView = sender as ListView;
+            if (sender is ListView)
+            {
+                listView.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                Size lvSize = listView.DesiredSize;
+                item = (int)(coY / lvSize.Height * listView.Items.Count);
+                item = item > listView.Items.Count ? listView.Items.Count - 1 : item;
+            }
+
+            var tappedItem = listView.Items[item];
+            listView.SelectedItem = tappedItem;
         }
 
     }
