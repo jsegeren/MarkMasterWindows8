@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MarkMaster.Common;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -276,8 +277,22 @@ namespace MarkMaster.Data
         
         private int _autoUniqueID = 0; // Private field to maintain next auto-incrementing ID
         private double _sessionalGrade;  // Private field to maintain current sessional average
+        private double _sessionalGradeTwelve; // Sessional average in twelve-point McMaster scale
+        private double _sessionalGradeFour; // Sessional average in four-point GPA scale
         private UInt16 _sessionalUnits; // Private field to maintain current sessional units
         private bool _isEditingFlag; // Private field indicating whether user is editing fields
+        private static GradeScaleConverter gradeScaleConverter = new GradeScaleConverter(); // Private converter member
+
+        public GradesDataSource()
+        {
+            this.Groups.CollectionChanged += OnCoursesCollectionChanged;
+        }
+
+        // Recalculate sessional grade if courses changed
+        private void OnCoursesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            RecalculateSessionalGrade();
+        }
 
         public bool IsEditingFlag
         {
@@ -312,6 +327,30 @@ namespace MarkMaster.Data
             set
             {
                 if (SetProperty<double>(ref _sessionalGrade, value)) { }
+            }
+        }
+
+        public double SessionalGradeFour
+        {
+            get
+            {
+                return _sessionalGradeFour;
+            }
+            set
+            {
+                if (SetProperty<double>(ref _sessionalGradeFour, value)) { }
+            }
+        }
+
+        public double SessionalGradeTwelve
+        {
+            get
+            {
+                return _sessionalGradeTwelve;
+            }
+            set
+            {
+                if (SetProperty<double>(ref _sessionalGradeTwelve, value)) { }
             }
         }
 
@@ -414,6 +453,12 @@ namespace MarkMaster.Data
                 course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Remove(targetItem);
         }
 
+        // Static method to delete an entire course; returns true if completely successfully
+        public static bool RemoveCourse(GradesDataGroup targetCourse)
+        {
+            return _gradesDataSource.Groups.Remove(targetCourse);
+        }
+
         // Static method to generate blank new course; returns auto-generated unique ID
         // for subsequent access to the course
         public static string CreateNewCourse()
@@ -442,11 +487,29 @@ namespace MarkMaster.Data
         // Static method to re-evaluate sessional average over all courses for grades data source object
         public static void RecalculateSessionalGrade()
         {
-            // First, update total number of units
-            _gradesDataSource._sessionalUnits = (UInt16) _gradesDataSource.Groups.Select(course => (double)course.CourseUnits).Sum();
-            // Retrieve sessional grade via dot product of units * grades (all courses), divided by total of units
-            _gradesDataSource._sessionalGrade = _gradesDataSource.Groups.Select(course => course.CourseUnits * course.CourseGrade).Sum() /
-                (double) _gradesDataSource._sessionalUnits;
+            //// First, update total number of units
+            //_gradesDataSource.SessionalUnits = (UInt16) _gradesDataSource.Groups.Select(course => (double)course.CourseUnits).Sum();
+            //// Retrieve sessional grade via dot product of units * grades (all courses), divided by total of units
+            //_gradesDataSource.SessionalGrade = _gradesDataSource.Groups.Select(course => course.CourseUnits * course.CourseGrade).Sum() /
+            //    (double) _gradesDataSource.SessionalUnits;
+
+            // Reset the accumulators
+            _gradesDataSource.SessionalUnits = 0; 
+            _gradesDataSource.SessionalGrade = 0;
+            _gradesDataSource.SessionalGradeFour = 0;
+            _gradesDataSource.SessionalGradeTwelve = 0;
+            foreach (GradesDataGroup course in _gradesDataSource.Groups)
+            {
+                _gradesDataSource.SessionalUnits += course.CourseUnits;
+                _gradesDataSource.SessionalGrade += course.CourseGrade * course.CourseUnits;
+                _gradesDataSource.SessionalGradeFour +=
+                    gradeScaleConverter.PercentageToGradeScale(course.CourseGrade, "Four") * course.CourseUnits;
+                _gradesDataSource.SessionalGradeTwelve +=
+                    gradeScaleConverter.PercentageToGradeScale(course.CourseGrade, "Twelve") * course.CourseUnits;
+            }
+            _gradesDataSource.SessionalGrade /= _gradesDataSource.SessionalUnits;
+            _gradesDataSource.SessionalGradeFour /= _gradesDataSource.SessionalUnits;
+            _gradesDataSource.SessionalGradeTwelve /= _gradesDataSource.SessionalUnits;
         }
 
         // Static method to switch editing flag on/off

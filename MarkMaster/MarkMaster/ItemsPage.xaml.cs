@@ -29,6 +29,7 @@ namespace MarkMaster
     {
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
+        private GradesDataSource gradesDataSource;
 
         /// <summary>
         /// NavigationHelper is used on each page to aid in navigation and 
@@ -69,13 +70,15 @@ namespace MarkMaster
         {
             //ObservableCollection<GradesDataGroup> sampleDataGroups = 
                 //(ObservableCollection<GradesDataGroup>) await GradesDataSource.GetGroupsAsync();
-            GradesDataSource gradesDataSource = (GradesDataSource) await GradesDataSource.GetDataSourceAsync();
+            gradesDataSource = (GradesDataSource) await GradesDataSource.GetDataSourceAsync();
 
             // Add final element representing new/add course button
             //this.DefaultViewModel["Courses"] = sampleDataGroups;
             this.DefaultViewModel["Courses"] = (ObservableCollection<GradesDataGroup>) gradesDataSource.Groups;
-            this.DefaultViewModel["SessionalGrade"] = gradesDataSource.SessionalGrade;
-            this.DefaultViewModel["SessionalUnits"] = gradesDataSource.SessionalUnits;
+            this.DefaultViewModel["Grades"] = gradesDataSource;
+            //this.DefaultViewModel["SessionalUnits"] = gradesDataSource.SessionalUnits;
+
+            itemGridView.SelectedIndex = -1; // No item selected upon load
         }
 
         /// <summary>
@@ -120,6 +123,60 @@ namespace MarkMaster
         {
             string uniqueID = GradesDataSource.CreateNewCourse();
             this.Frame.Navigate(typeof(SplitPage), uniqueID);
+        }
+
+        private void OnRemoveCourseButtonClick(object sender, RoutedEventArgs e)
+        {
+            GradesDataSource.RemoveCourse((GradesDataGroup) itemGridView.SelectedItem);
+            itemGridView.SelectedIndex = -1; // Set to no selected course
+        }
+
+        private void itemGridView_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            BottomAppBar.IsOpen = true;
+
+            int item = 0;
+
+            if (sender is GridView)
+            {
+                GridView gridView = sender as GridView;
+
+                //gridView.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                Size gridViewSize = gridView.DesiredSize;
+
+                // Get horizontal position of right tap (since horizontal gridview)
+                Double horizontalCoordinate = e.GetPosition((UIElement)sender).X;
+
+
+                item = (int)(horizontalCoordinate / gridViewSize.Width * gridView.Items.Count);
+                item = item >= gridView.Items.Count? gridView.Items.Count - 1: item;
+
+                var tappedItem = gridView.Items[item];
+
+                // Deselect if item already selected
+                gridView.SelectedItem = (gridView.SelectedItem != tappedItem) ? tappedItem : null;
+            }
+
+
+        }
+
+        private void itemGridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            GridView gridView = sender as GridView;
+            if (sender is GridView)
+            {
+                if (gridView.SelectedIndex != -1)
+                {
+                    removeCourseButton.IsEnabled = true;
+                    //removeCourseButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    removeCourseButton.IsEnabled = false;
+                    //removeCourseButton.Visibility = Visibility.Collapsed;
+                }
+            }
+
         }
 
         //private void OnClosePopupClick(object sender, RoutedEventArgs e)

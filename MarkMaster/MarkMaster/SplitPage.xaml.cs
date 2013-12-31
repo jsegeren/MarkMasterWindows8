@@ -10,6 +10,7 @@ using Windows.ApplicationModel;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -31,6 +32,7 @@ namespace MarkMaster
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
         private String subjectSearchString;
+        private String previousTextBoxString;
 
         /// <summary>
         /// NavigationHelper is used on each page to aid in navigation and 
@@ -381,6 +383,7 @@ namespace MarkMaster
                 ((ComboBox)sender).SelectedItem = subjectMatch;
                 ((ComboBox)sender).IsDropDownOpen = true;
             }
+            courseCodeEdit2_KeyDown(sender, e);
         }
 
         private void itemWeightValueEdit_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -410,19 +413,117 @@ namespace MarkMaster
             BottomAppBar.IsOpen = true;
 
             int item = 0;
-            Double coY = e.GetPosition((UIElement)sender).Y;
+            Double verticalCoordinate = e.GetPosition((UIElement)sender).Y;
 
             ListView listView = sender as ListView;
             if (sender is ListView)
             {
                 listView.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                Size lvSize = listView.DesiredSize;
-                item = (int)(coY / lvSize.Height * listView.Items.Count);
+                Size listViewSize = listView.DesiredSize;
+                item = (int)(verticalCoordinate / listViewSize.Height * listView.Items.Count);
                 item = item > listView.Items.Count ? listView.Items.Count - 1 : item;
             }
 
             var tappedItem = listView.Items[item];
             listView.SelectedItem = tappedItem;
+        }
+
+        private void pageTitle_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            TextBlockTapped(pageTitle, pageTitleEdit);
+        }
+
+        private void TextBlockTapped(TextBlock readBlock, TextBox editBox)
+        {
+            readBlock.Visibility = Visibility.Collapsed;
+            editBox.Visibility = Visibility.Visible;
+            editBox.Focus(FocusState.Programmatic);
+        }
+
+        private void OnTextBoxFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            textBox.SelectAll();
+            previousTextBoxString = textBox.Text;
+        }
+
+
+        private void pageTitleEdit_LostFocus(object sender, RoutedEventArgs e)
+        {
+            pageTitle.Visibility = Visibility.Visible;
+            pageTitleEdit.Visibility = Visibility.Collapsed;
+            if (String.IsNullOrWhiteSpace(pageTitleEdit.Text))
+            {
+                if (!String.IsNullOrWhiteSpace(previousTextBoxString))
+                {
+                    pageTitleEdit.Text = previousTextBoxString;
+                }
+                else
+                {
+                    pageTitleEdit.Text = "New Course";
+                }
+            }
+        }
+
+        private void pageTitleEdit_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Enter || e.Key == VirtualKey.Escape)
+            {
+                pageTitleEdit_LostFocus(sender, null);
+            }
+        }
+
+        private void courseCode_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            courseCode.Visibility = Visibility.Collapsed;
+            courseCodeEditPanel.Visibility = Visibility.Visible;
+            courseCodeEdit.Focus(FocusState.Programmatic);
+        }
+
+        private void courseCodeEdit_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OnTextBoxFocus(courseCodeEdit2, e);
+        }
+
+        private void courseCodeEdit_LostFocus(object sender, RoutedEventArgs e)
+        {
+            courseCode.Visibility = Visibility.Visible;
+            courseCodeEditPanel.Visibility = Visibility.Collapsed;
+            if (String.IsNullOrWhiteSpace(courseCode.Text) && String.IsNullOrWhiteSpace(courseCodeEdit2.Text))
+            {
+                if (!String.IsNullOrWhiteSpace(previousTextBoxString))
+                {
+                    courseCodeEdit2.Text = previousTextBoxString;
+                }
+                else
+                {
+                    courseCodeEdit2.Text = "";
+                }
+            }
+        }
+
+        private void courseCodeEdit2_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Enter || e.Key == VirtualKey.Escape)
+            {
+                courseCodeEdit_LostFocus(sender, null);
+            }
+
+            else if (!(char.IsLetterOrDigit((char)e.Key)))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void pageTitleEdit_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OnTextBoxFocus(sender, e);
+            courseCodeEdit_LostFocus(sender, e);
+        }
+
+        private void Slider_GotFocus(object sender, RoutedEventArgs e)
+        {
+            courseCodeEdit_LostFocus(sender, e);
         }
 
     }

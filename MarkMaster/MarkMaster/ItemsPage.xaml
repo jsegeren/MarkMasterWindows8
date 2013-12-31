@@ -34,24 +34,54 @@
         </Grid.ChildrenTransitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="140"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="1" Grid.Column="0" x:Name="courseGradePanel" Margin="50,10,20,20" VerticalAlignment="Stretch">
-            <TextBlock x:Name="sessionalGradeLabel" Margin="0,10,10,10" Text="Your sessional average is" Style="{StaticResource SubtitleTextBlockStyle}" FontSize="20"/>
-            <TextBlock x:Name="sessionalGrade" Margin="0,100,0,0" Text="{Binding SessionalGrade, 
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="courseGradePanel" Margin="30,10,20,20" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <TextBlock x:Name="sessionalGradeLabel" Margin="0,10,10,50" Text="Sessional Average" Style="{StaticResource SubtitleTextBlockStyle}" FontSize="20"/>
+            <StackPanel Margin="0,30,0,0" x:Name="sessionalGradePanel" Orientation="Horizontal">
+                <TextBlock x:Name="sessionalGrade" Width="Auto" Margin="0,0,0,0" Text="{Binding Grades.SessionalGrade, 
                                 Converter={StaticResource StringConverter}, 
-                                ConverterParameter=\{0:0.00\}}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="100" FontWeight="Light" FontFamily="Global User Interface" />
-            <TextBlock x:Name="sessionalUnitsLabel" Margin="0,30,10,10" Text="over" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Left" FontSize="20"/>
-            <TextBlock x:Name="sessionalUnits" Margin="0,30,0,0" Text="{Binding SessionalUnits, 
-                                Converter={StaticResource StringConverter}, 
-                                ConverterParameter=\{0:0.\}}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="60" FontWeight="Light" FontFamily="Global User Interface" />
-            <TextBlock x:Name="sessionalUnitsLabel2" Margin="0,30,10,10" Text="units" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Left" FontSize="20"/>
+                                ConverterParameter=\{0:0.00\}}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="100" FontWeight="Light"/>
+                <TextBlock Text="%" Margin="30,0,20,0"
+                               Style="{StaticResource SubheaderTextBlockStyle}" FontSize="75" FontWeight="Light"
+                               VerticalAlignment="Center"/>
+            </StackPanel>
         </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="30,70,50,10">
+            <TextBlock x:Name="courseGradeTwelve" 
+                           Text="{Binding Grades.SessionalGradeTwelve, 
+                                Converter={StaticResource StringConverter}, 
+                                ConverterParameter=\{0:0.00\}}"
+                           Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="75" FontWeight="Normal"
+                           VerticalAlignment="Top"/>
+            <TextBlock x:Name="courseGradeTwelveLabel" Margin="0,10,0,5" Text="Twelve-Point Scale" Style="{StaticResource SubtitleTextBlockStyle}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="20,70,30,10">
+            <TextBlock x:Name="courseGradeFour"
+                           Text="{Binding Grades.SessionalGradeFour, 
+                                Converter={StaticResource StringConverter}, 
+                                ConverterParameter=\{0:0.00\}}"
+                           Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="75" FontWeight="Normal"
+                           VerticalAlignment="Top"/>
+            <TextBlock x:Name="courseGradeFourLabel" Margin="0,10,0,5" HorizontalAlignment="Left"
+                               Text="Four-Point GPA" Style="{StaticResource SubtitleTextBlockStyle}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="30,30,10,10">
+            <TextBlock x:Name="sessionalUnits" Margin="0,60,0,0" Text="{Binding Grades.SessionalUnits, 
+                                Converter={StaticResource StringConverter}, 
+                                ConverterParameter=\{0:0.\}}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="60" FontWeight="Light" />
+            <TextBlock x:Name="sessionalUnitsLabel2" Margin="0,30,10,10" Text="Units" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Left" FontSize="20"/>
+        </StackPanel>
+
 
         <!-- Horizontal scrolling grid -->
         <GridView
@@ -59,14 +89,17 @@
             AutomationProperties.AutomationId="ItemsGridView"
             AutomationProperties.Name="Items"
             TabIndex="1"
-            Grid.RowSpan="2"
-            Grid.Column="1"
-            Padding="50,140,50,50"
+            Grid.Row="1"
+            Grid.RowSpan="3"
+            Grid.Column="2"
+            Padding="50,50,50,50"
             ItemsSource="{Binding Source={StaticResource itemsViewSource}}"
-            SelectionMode="None"
-            IsSwipeEnabled="True"
+            SelectionMode="Single"
+            IsSwipeEnabled="False"
             IsItemClickEnabled="True"
-            ItemClick="ItemView_ItemClick">
+            ItemClick="ItemView_ItemClick"
+            RightTapped="itemGridView_RightTapped"
+            SelectionChanged="itemGridView_SelectionChanged">
             <GridView.ItemTemplate>
                 <DataTemplate>
                     <Grid HorizontalAlignment="Left" Width="250" Height="400">
@@ -94,7 +127,7 @@
         </GridView>
 
         <!-- Back button and page title -->
-        <Grid Grid.ColumnSpan="2">
+        <Grid Grid.ColumnSpan="3">
             <Grid.ColumnDefinitions>
                 <!--<ColumnDefinition Width="120"/>-->
                 <ColumnDefinition Width="*"/>
@@ -128,7 +161,9 @@
     <Page.BottomAppBar>
         <AppBar>
             <StackPanel Orientation="Horizontal">
-                <AppBarButton Label="Add Course" Icon="Add" Click="OnAddCourseButtonClick"/>
+                <AppBarButton x:Name="addCourseButton" Label="Add Course" Icon="Add" Click="OnAddCourseButtonClick"/>
+                <AppBarButton x:Name="removeCourseButton" Label="Remove Course" Icon="Remove" Click="OnRemoveCourseButtonClick" IsEnabled="False" Visibility="Visible"/>
+                <AppBarSeparator x:Name="appBarSeparator" VerticalAlignment="Stretch"/>
             </StackPanel>
         </AppBar>
     </Page.BottomAppBar>

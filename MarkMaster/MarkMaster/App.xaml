@@ -12,5 +12,6 @@
         <common:StringFormatter x:Key="StringConverter"/>
         <common:BooleanToVisibilityConverter x:Key="TrueToVisibilityConverter" />
         <common:BooleanToVisibilityConverter x:Key="FalseToVisibilityConverter" IsReversed="True"/>
+        <common:GradeScaleConverter x:Key="GradeScaleConverter"/>
     </Application.Resources>
 </Application>

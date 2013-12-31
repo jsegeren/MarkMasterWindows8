@@ -26,7 +26,7 @@
         * Row 0 contains the back button and page title
         * Row 1 contains the rest of the page layout
     -->
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="parentGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.ChildrenTransitions>
             <TransitionCollection>
                 <EntranceThemeTransition/>
@@ -56,14 +56,17 @@
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"/>
             <TextBlock x:Name="pageTitle" Text="{Binding Group.CourseName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
-                       IsHitTestVisible="false" TextWrapping="NoWrap" 
+                       IsHitTestVisible="True" TextWrapping="NoWrap" 
                        VerticalAlignment="Bottom" Margin="0,0,0,40"
-                       Visibility="{Binding IsEditingFlag, Converter={StaticResource FalseToVisibilityConverter}}"/>
+                       Visibility="{Binding IsEditingFlag, Converter={StaticResource FalseToVisibilityConverter}}"
+                       Tapped="pageTitle_Tapped"/>
             <TextBox x:Name="pageTitleEdit" Text="{Binding Group.CourseName, Mode=TwoWay}" FontWeight="Light" FontSize="55" Grid.Column="1"
                      IsHitTestVisible="True" TextWrapping="NoWrap" Margin="-15,0,0,20" Background="{x:Null}" Foreground="White" 
                      VerticalAlignment="Bottom" VerticalContentAlignment="Bottom"
                      HorizontalAlignment="Left" HorizontalContentAlignment="Left"
-                     Visibility="{Binding IsEditingFlag, Converter={StaticResource TrueToVisibilityConverter}}"/>
+                     Visibility="{Binding IsEditingFlag, Converter={StaticResource TrueToVisibilityConverter}}"
+                     GotFocus="pageTitleEdit_GotFocus" LostFocus="pageTitleEdit_LostFocus"
+                     PlaceholderText="Enter a course name" KeyDown="pageTitleEdit_KeyDown"/>
         </Grid>
         
         <Grid x:Name="courseDetailGrid" Grid.Row="1" Grid.Column="0"
@@ -71,21 +74,23 @@
               d:DataContext="{Binding Groups[0], Source={d:DesignData Source=/DataModel/GradesData.json, Type=data:GradesDataSource}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <StackPanel x:Name="courseDetailPanel" Margin="30,10,20,20" VerticalAlignment="Top">
                 <TextBlock x:Name="courseCodeLabel" Margin="0,10,0,5" Text="Course Code" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <TextBlock x:Name="courseCode" Margin="0,0,0,10" Text="{Binding CourseCode, Mode=TwoWay}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center" FontSize="35"/>
+                <TextBlock x:Name="courseCode" Margin="0,0,0,10" Text="{Binding CourseCode, Mode=TwoWay}" 
+                           Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center" FontSize="35"
+                           Tapped="courseCode_Tapped"/>
                 <StackPanel x:Name="courseCodeEditPanel" Margin="0,10,0,10" Orientation="Horizontal" Width="365" Height="40" Visibility="Collapsed">
                     <ComboBox x:Name="courseCodeEdit" Margin="0,0,10,0" Width="250" Height="40" Visibility="Visible" 
-                              SelectionChanged="courseCodeEdit_SelectionChanged" KeyUp="courseCodeEdit_KeyUp"
+                              SelectionChanged="courseCodeEdit_SelectionChanged" KeyUp="courseCodeEdit_KeyUp" GotFocus="courseCodeEdit_GotFocus"
                               Background="{x:Null}" Foreground="White" FontSize="25"/>
                     <!--<ab:AutoCompleteBox x:Name="courseCodeEdit" Margin="0,0,10,0" Width="250" Height="40" Visibility="Visible" />-->
                     <TextBox x:Name="courseCodeEdit2" Width="90" Height="40" Visibility="Visible" VerticalAlignment="Center" VerticalContentAlignment="Center"
                              TextChanged="courseCodeEdit2_TextChanged" InputScope="AlphanumericHalfWidth" MaxLength="4"
-                             Background="{x:Null}" Foreground="White" FontSize="25"/>
+                             Background="{x:Null}" Foreground="White" FontSize="25" GotFocus="courseCodeEdit_GotFocus" KeyDown="courseCodeEdit2_KeyDown"
+                             LostFocus="courseCodeEdit_LostFocus"/>
                 </StackPanel>
                 <TextBlock x:Name="courseUnitsLabel" Margin="0,10,0,5" Text="Course Units" Style="{StaticResource SubtitleTextBlockStyle}"/>
                 <Grid Margin="30,0,30,0">
@@ -93,9 +98,12 @@
                         <ColumnDefinition Width="80"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="courseUnits" Grid.Column="0" Margin="0,10,0,5" Text="{Binding CourseUnits}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="35"/>
+                    <TextBlock x:Name="courseUnits" Grid.Column="0" Margin="0,10,0,5" Text="{Binding CourseUnits}" 
+                               Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="35"/>
                     <Slider Grid.Column="1" Margin="50,0,0,0" VerticalAlignment="Center"
-                        Value="{Binding CourseUnits, Mode=TwoWay}" Orientation="Horizontal" SmallChange="1" StepFrequency="1" IsThumbToolTipEnabled="False" Height="35" Maximum="6" Minimum="1" LargeChange="1" />
+                        Value="{Binding CourseUnits, Mode=TwoWay}" Orientation="Horizontal" SmallChange="1" 
+                            StepFrequency="1" IsThumbToolTipEnabled="False" Height="35" Maximum="6" Minimum="1" LargeChange="1" 
+                            GotFocus="Slider_GotFocus"/>
                 </Grid>
                 <TextBlock x:Name="courseGoalLabel" Margin="0,10,0,5" Text="Course Goal" Style="{StaticResource SubtitleTextBlockStyle}"/>
                 <Grid Margin="30,0,30,0">
@@ -110,16 +118,49 @@
                              HorizontalAlignment="Left" Visibility="Collapsed" Background="{x:Null}" Foreground="White"
                              FontSize="25" MaxLength="4" KeyDown="itemWeightValueEdit_KeyDown"/>
                     <Slider Grid.Column="1" Margin="50,0,0,0" VerticalAlignment="Center"
-                        Value="{Binding CourseGoal, Mode=TwoWay}" Orientation="Horizontal" SmallChange="0.1" StepFrequency="0.1" IsThumbToolTipEnabled="False" Height="35" Maximum="100" Minimum="0" LargeChange="1" HorizontalAlignment="Stretch" />
+                        Value="{Binding CourseGoal, Mode=TwoWay}" Orientation="Horizontal" SmallChange="0.1" 
+                            StepFrequency="0.1" IsThumbToolTipEnabled="False" Height="35" Maximum="100" 
+                            Minimum="0" LargeChange="1" HorizontalAlignment="Stretch" 
+                            GotFocus="Slider_GotFocus"/>
                 </Grid>
                 <TextBlock x:Name="courseGradeLabel" Margin="0,30,0,5" Text="Course Grade" Style="{StaticResource SubtitleTextBlockStyle}"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="1" x:Name="courseGradePanel" Margin="30,10,20,20" VerticalAlignment="Top">
-                <TextBlock x:Name="courseGrade" Margin="40,50,10,10" Text="{Binding CourseGrade, 
+            <Grid x:Name="courseGradeGrid" Grid.Row="1" Margin="30,10,20,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel x:Name="courseGradePanel" Grid.Row="0" Grid.ColumnSpan="2" Margin="30,50,0,10" Orientation="Horizontal" 
+                            HorizontalAlignment="Left">
+                    <TextBlock x:Name="courseGrade" Text="{Binding CourseGrade, 
                                 Converter={StaticResource StringConverter}, 
-                                ConverterParameter=\{0:0.00\}}" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="100" FontWeight="Light"/>
-            </StackPanel>
+                                ConverterParameter=\{0:0.00\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="100" FontWeight="Light"/>
+                    <TextBlock Grid.Column="1" Text="%" Margin="30,0,20,0"
+                               Style="{StaticResource SubheaderTextBlockStyle}" FontSize="75" FontWeight="Light"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,60,10,10">
+                    <TextBlock x:Name="courseGradeTwelve" 
+                           Text="{Binding CourseGrade, Converter={StaticResource GradeScaleConverter}, ConverterParameter=Twelve}"
+                           Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="75" FontWeight="Normal"
+                           VerticalAlignment="Top"/>
+                    <TextBlock x:Name="courseGradeTwelveLabel" Margin="0,10,0,5" Text="Twelve-Point Scale" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,60,10,10">
+                    <TextBlock x:Name="courseGradeFour"
+                           Text="{Binding CourseGrade, Converter={StaticResource GradeScaleConverter}, ConverterParameter=Four}"
+                           Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="75" FontWeight="Normal"
+                           VerticalAlignment="Top"/>
+                    <TextBlock x:Name="courseGradeFourLabel" Margin="0,10,0,5" HorizontalAlignment="Left"
+                               Text="Four-Point Scale" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                </StackPanel>
+            </Grid>
+            
             
             <!--<StackPanel Grid.Row="2" x:Name="buttonPanel" Orientation="Horizontal" Margin="30,10,10,10" VerticalAlignment="Stretch">
                 <Button x:Name="ButtonEditFields" Content="Edit Course Info" HorizontalAlignment="Center"

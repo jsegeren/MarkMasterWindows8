@@ -107,6 +107,7 @@
     </Compile>
     <Compile Include="Common\BooleanConverter.cs" />
     <Compile Include="Common\StringFormatter.cs" />
+    <Compile Include="Common\GradeScaleConverter.cs" />
     <Compile Include="ItemsPage.xaml.cs">
       <DependentUpon>ItemsPage.xaml</DependentUpon>
     </Compile>
