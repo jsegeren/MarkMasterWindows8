@@ -366,7 +366,7 @@ namespace MarkMaster
                 courseCode.Text = courseCodeEdit.SelectedValue.ToString();
             }
             if (!String.IsNullOrEmpty(courseCodeEdit2.Text.ToString()))
-            {
+            {   
                 courseCode.Text = (courseCodeEdit.SelectedValue == null || String.IsNullOrEmpty(courseCodeEdit.SelectedValue.ToString())) ?
                     courseCodeEdit2.Text.ToString() : courseCode.Text + " " + courseCodeEdit2.Text.ToString();
             }
@@ -433,11 +433,17 @@ namespace MarkMaster
             TextBlockTapped(pageTitle, pageTitleEdit);
         }
 
-        private void TextBlockTapped(TextBlock readBlock, TextBox editBox)
+        private void TextBlockTapped(UIElement readBlock, TextBox editBox)
         {
             readBlock.Visibility = Visibility.Collapsed;
             editBox.Visibility = Visibility.Visible;
             editBox.Focus(FocusState.Programmatic);
+        }
+
+        private void TextBoxLostFocus(UIElement readBlock, UIElement editBox)
+        {
+            readBlock.Visibility = Visibility.Visible;
+            editBox.Visibility = Visibility.Collapsed;
         }
 
         private void OnTextBoxFocus(object sender, RoutedEventArgs e)
@@ -450,8 +456,9 @@ namespace MarkMaster
 
         private void pageTitleEdit_LostFocus(object sender, RoutedEventArgs e)
         {
-            pageTitle.Visibility = Visibility.Visible;
-            pageTitleEdit.Visibility = Visibility.Collapsed;
+            TextBoxLostFocus(pageTitle, pageTitleEdit);
+            //pageTitle.Visibility = Visibility.Visible;
+            //pageTitleEdit.Visibility = Visibility.Collapsed;
             if (String.IsNullOrWhiteSpace(pageTitleEdit.Text))
             {
                 if (!String.IsNullOrWhiteSpace(previousTextBoxString))
@@ -487,19 +494,12 @@ namespace MarkMaster
 
         private void courseCodeEdit_LostFocus(object sender, RoutedEventArgs e)
         {
-            courseCode.Visibility = Visibility.Visible;
-            courseCodeEditPanel.Visibility = Visibility.Collapsed;
-            if (String.IsNullOrWhiteSpace(courseCode.Text) && String.IsNullOrWhiteSpace(courseCodeEdit2.Text))
-            {
-                if (!String.IsNullOrWhiteSpace(previousTextBoxString))
-                {
-                    courseCodeEdit2.Text = previousTextBoxString;
-                }
-                else
-                {
-                    courseCodeEdit2.Text = "";
-                }
-            }
+            TextBoxLostFocus(courseCode, courseCodeEditPanel);
+            //courseCode.Visibility = Visibility.Visible;
+            //courseCodeEditPanel.Visibility = Visibility.Collapsed;
+            var codeStringList = courseCode.Text.Split(' ');
+            courseCodeEdit2.Text = (String.IsNullOrWhiteSpace(courseCode.Text) || codeStringList.Length <= 1) ?
+                "1A03" : codeStringList.Last();
         }
 
         private void courseCodeEdit2_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -525,6 +525,31 @@ namespace MarkMaster
         {
             courseCodeEdit_LostFocus(sender, e);
         }
+
+        private void itemTitle_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            TextBlockTapped(itemTitle, itemTitleEdit);
+        }
+
+        private void itemSubtitle_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            TextBlockTapped(itemSubtitle, itemSubtitleEdit);
+        }
+
+        private void itemTitleEdit_LostFocus(object sender, RoutedEventArgs e)
+        {
+            itemTitleEdit.Text = (String.IsNullOrWhiteSpace(itemTitleEdit.Text)) ?
+                "New Item Name" : itemTitleEdit.Text;
+            TextBoxLostFocus(itemTitle, itemTitleEdit);
+        }
+
+        private void itemSubtitleEdit_LostFocus(object sender, RoutedEventArgs e)
+        {
+            itemSubtitleEdit.Text = (String.IsNullOrWhiteSpace(itemSubtitleEdit.Text)) ?
+                "New Item Type" : itemSubtitleEdit.Text;
+            TextBoxLostFocus(itemSubtitle, itemSubtitleEdit);
+        }
+
 
     }
 }

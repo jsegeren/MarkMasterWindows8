@@ -127,39 +127,17 @@ namespace MarkMaster
 
         private void OnRemoveCourseButtonClick(object sender, RoutedEventArgs e)
         {
-            GradesDataSource.RemoveCourse((GradesDataGroup) itemGridView.SelectedItem);
+            // Copy selected items by value, since deleting them will progressively affect
+            // selection
+            List<object> targetCourses = new List<object>(itemGridView.SelectedItems);
+
+            GradesDataSource.RemoveCourses(targetCourses);
+
             itemGridView.SelectedIndex = -1; // Set to no selected course
         }
 
-        private void itemGridView_RightTapped(object sender, RightTappedRoutedEventArgs e)
-        {
-            BottomAppBar.IsOpen = true;
-
-            int item = 0;
-
-            if (sender is GridView)
-            {
-                GridView gridView = sender as GridView;
-
-                //gridView.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                Size gridViewSize = gridView.DesiredSize;
-
-                // Get horizontal position of right tap (since horizontal gridview)
-                Double horizontalCoordinate = e.GetPosition((UIElement)sender).X;
-
-
-                item = (int)(horizontalCoordinate / gridViewSize.Width * gridView.Items.Count);
-                item = item >= gridView.Items.Count? gridView.Items.Count - 1: item;
-
-                var tappedItem = gridView.Items[item];
-
-                // Deselect if item already selected
-                gridView.SelectedItem = (gridView.SelectedItem != tappedItem) ? tappedItem : null;
-            }
-
-
-        }
-
+        // Want to allow users to select and remove courses (allow as many selections as desired)
+        // Hint at this functionality by exposing the appbar and enabling delete option
         private void itemGridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             GridView gridView = sender as GridView;
@@ -168,24 +146,18 @@ namespace MarkMaster
                 if (gridView.SelectedIndex != -1)
                 {
                     removeCourseButton.IsEnabled = true;
+                    BottomAppBar.IsOpen = true;
                     //removeCourseButton.Visibility = Visibility.Visible;
                 }
                 else
                 {
                     removeCourseButton.IsEnabled = false;
+                    BottomAppBar.IsOpen = false;
                     //removeCourseButton.Visibility = Visibility.Collapsed;
                 }
             }
 
         }
-
-        //private void OnClosePopupClick(object sender, RoutedEventArgs e)
-        //{
-        //    if (AddCoursePopup.IsOpen) { 
-        //        AddCoursePopup.IsOpen = false;
-        //        this.Opacity = 1.0;
-        //    }
-        //}
 
     }
 }

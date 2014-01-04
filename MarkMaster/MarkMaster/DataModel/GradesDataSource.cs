@@ -458,6 +458,17 @@ namespace MarkMaster.Data
         {
             return _gradesDataSource.Groups.Remove(targetCourse);
         }
+        
+        // Static method to delete multiple courses; true if all complete successfully
+        public static bool RemoveCourses(List<object> targetCourses)
+        {
+            bool isSuccess = true;
+            foreach (GradesDataGroup targetCourse in targetCourses)
+            {
+                isSuccess &= RemoveCourse(targetCourse);
+            }
+            return isSuccess;
+        }
 
         // Static method to generate blank new course; returns auto-generated unique ID
         // for subsequent access to the course
@@ -507,9 +518,22 @@ namespace MarkMaster.Data
                 _gradesDataSource.SessionalGradeTwelve +=
                     gradeScaleConverter.PercentageToGradeScale(course.CourseGrade, "Twelve") * course.CourseUnits;
             }
-            _gradesDataSource.SessionalGrade /= _gradesDataSource.SessionalUnits;
-            _gradesDataSource.SessionalGradeFour /= _gradesDataSource.SessionalUnits;
-            _gradesDataSource.SessionalGradeTwelve /= _gradesDataSource.SessionalUnits;
+            _gradesDataSource.SessionalGrade = (_gradesDataSource.SessionalUnits == 0) ? 
+                0.0 : _gradesDataSource.SessionalGrade / _gradesDataSource.SessionalUnits;
+            
+            // Avoid divide by zero issues (i.e. NaN results) - just default to 0 for now
+            if (_gradesDataSource.SessionalUnits == 0)
+            {
+                _gradesDataSource.SessionalGrade = 0;
+                _gradesDataSource.SessionalGradeFour = 0;
+                _gradesDataSource.SessionalGradeTwelve = 0;
+            }
+            else
+            {
+                _gradesDataSource.SessionalGrade /= _gradesDataSource.SessionalUnits;
+                _gradesDataSource.SessionalGradeFour /= _gradesDataSource.SessionalUnits;
+                _gradesDataSource.SessionalGradeTwelve /= _gradesDataSource.SessionalUnits;
+            }
         }
 
         // Static method to switch editing flag on/off

@@ -94,11 +94,10 @@
             Grid.Column="2"
             Padding="50,50,50,50"
             ItemsSource="{Binding Source={StaticResource itemsViewSource}}"
-            SelectionMode="Single"
-            IsSwipeEnabled="False"
+            SelectionMode="Multiple"
+            IsSwipeEnabled="True"
             IsItemClickEnabled="True"
             ItemClick="ItemView_ItemClick"
-            RightTapped="itemGridView_RightTapped"
             SelectionChanged="itemGridView_SelectionChanged">
             <GridView.ItemTemplate>
                 <DataTemplate>
