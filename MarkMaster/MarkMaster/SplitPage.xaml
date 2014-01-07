@@ -113,10 +113,12 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="courseGoal" Grid.Column="0" Margin="0,12,0,3" Text="{Binding CourseGoal, 
                         Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" 
-                               Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="35"/>
+                               Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="35"
+                               Tapped="courseGoal_Tapped"/>
                     <TextBox x:Name="courseGoalEdit" Grid.Column="0" Margin="0,10,0,5" Text="{Binding CourseGoal, Mode=TwoWay}" 
                              HorizontalAlignment="Left" Visibility="Collapsed" Background="{x:Null}" Foreground="White"
-                             FontSize="25" MaxLength="4" KeyDown="itemWeightValueEdit_KeyDown"/>
+                             FontSize="25" MaxLength="4" KeyDown="itemWeightValueEdit_KeyDown"
+                             GotFocus="OnTextBoxFocus" LostFocus="courseGoalEdit_LostFocus"/>
                     <Slider Grid.Column="1" Margin="50,0,0,0" VerticalAlignment="Center"
                         Value="{Binding CourseGoal, Mode=TwoWay}" Orientation="Horizontal" SmallChange="0.1" 
                             StepFrequency="0.1" IsThumbToolTipEnabled="False" Height="35" Maximum="100" 
@@ -271,10 +273,12 @@
                 </StackPanel>
                 <StackPanel x:Name="itemWeightValuePanel" Grid.Row="1" Grid.Column="1" Margin="0,0,20,20" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock x:Name="itemWeightValue" Margin="0,0,0,0" Text="{Binding ItemWeight,
-                        Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="30"/>
+                        Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="30"
+                               Tapped="itemWeightValue_Tapped"/>
                     <TextBox x:Name="itemWeightValueEdit" Margin="0,0,0,0" Text="{Binding ItemWeight, Mode=TwoWay}"
                              Visibility="Collapsed" InputScope="Number" KeyDown="itemWeightValueEdit_KeyDown" MaxLength="4" 
-                             Background="{x:Null}" Foreground="White" FontSize="25"/>
+                             Background="{x:Null}" Foreground="White" FontSize="25"
+                             GotFocus="OnTextBoxFocus" LostFocus="itemWeightValueEdit_LostFocus"/>
                 </StackPanel>
                 <Slider Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,50,0" VerticalAlignment="Center"
                         Value="{Binding ItemWeight, Mode=TwoWay}" Orientation="Horizontal" SmallChange="0.1" StepFrequency="0.1" IsThumbToolTipEnabled="False" />
@@ -283,10 +287,12 @@
                 </StackPanel>
                 <StackPanel x:Name="itemGradeValuePanel" Grid.Row="2" Grid.Column="1" Margin="0,0,20,20" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock x:Name="itemGradeValue" Margin="0,0,0,0" Text="{Binding ItemGrade,
-                        Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="30"/>
+                        Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="30"
+                               Tapped="itemGradeValue_Tapped"/>
                     <TextBox x:Name="itemGradeValueEdit" Margin="0,0,0,0" Text="{Binding ItemGrade, Mode=TwoWay}" FontSize="25" 
                              Visibility="Collapsed" InputScope="Number" KeyDown="itemWeightValueEdit_KeyDown" MaxLength="4" 
-                             Background="{x:Null}" Foreground="White"/>
+                             Background="{x:Null}" Foreground="White"
+                             GotFocus="OnTextBoxFocus" LostFocus="itemGradeValueEdit_LostFocus"/>
                 </StackPanel>
                 <Slider Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,50,0" VerticalAlignment="Center"
                         Value="{Binding ItemGrade, Mode=TwoWay}" SmallChange="0.1" StepFrequency="0.1" IsThumbToolTipEnabled="False" />
@@ -298,10 +304,10 @@
                 <VisualState x:Name="PrimaryView" />
                 <VisualState x:Name="SinglePane">
                     <Storyboard>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="primaryColumn" Storyboard.TargetProperty="Width">
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="firstColumn" Storyboard.TargetProperty="Width">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="*"/>
                         </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="secondaryColumn" Storyboard.TargetProperty="Width">
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="thirdColumn" Storyboard.TargetProperty="Width">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemDetail" Storyboard.TargetProperty="Visibility">
@@ -321,7 +327,7 @@
                  -->
                 <VisualState x:Name="SinglePane_Detail">
                     <Storyboard>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="primaryColumn" Storyboard.TargetProperty="Width">
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="firstColumn" Storyboard.TargetProperty="Width">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemListView" Storyboard.TargetProperty="Visibility">
@@ -353,7 +359,7 @@
             <StackPanel Orientation="Horizontal">
                 <AppBarButton Label="Add Item" Icon="Add" Click="OnAddItemClick"/>
                 <AppBarButton Label="Remove Item" Icon="Remove" Click="OnRemoveItemClick"/>
-                <AppBarToggleButton Label="Edit Fields" Icon="Edit" Click="OnEditFieldsClick"/>
+                <AppBarToggleButton x:Name="editFieldsButton" Label="Edit Fields" Icon="Edit" Click="OnEditFieldsClick"/>
             </StackPanel>
         </AppBar>
     </Page.BottomAppBar>

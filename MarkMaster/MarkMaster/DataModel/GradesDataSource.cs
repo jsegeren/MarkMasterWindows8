@@ -1,4 +1,5 @@
 ﻿using MarkMaster.Common;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.Data.Json;
 using Windows.Storage;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
@@ -294,6 +296,18 @@ namespace MarkMaster.Data
             RecalculateSessionalGrade();
         }
 
+        public int AutoUniqueID
+        {
+            get
+            {
+                return _autoUniqueID;
+            }
+            set
+            {
+                if (SetProperty<int>(ref _autoUniqueID, value)) {}
+            }
+        }
+
         public bool IsEditingFlag
         {
             get
@@ -371,10 +385,16 @@ namespace MarkMaster.Data
             return _gradesDataSource;
         }
 
-        public static async Task<GradesDataGroup> GetGroupAsync(string uniqueId)
-        //public static GradesDataGroup GetGroup(string uniqueId)
+        // Public suspension data save mechanism
+        public static async Task<bool> SaveDataSourceAsync()
         {
-            await _gradesDataSource.GetGradesDataAsync(); // Comment out to avoid re-parsing JSON file
+            return await _gradesDataSource.SaveGradesDataAsync();
+        }
+
+        //public static async Task<GradesDataGroup> GetGroupAsync(string uniqueId)
+        public static GradesDataGroup GetGroup(string uniqueId)
+        {
+            //await _gradesDataSource.GetGradesDataAsync(); // Comment out to avoid re-parsing JSON file
             // Simple linear search is acceptable for small data sets
             var matches = _gradesDataSource.Groups.Where((group) => group.UniqueId.Equals(uniqueId));
             if (matches.Count() == 1) return matches.First();
@@ -391,41 +411,38 @@ namespace MarkMaster.Data
             return null;
         }
 
+        // Asynchronous static method to save existing grade data structures
+        // as serialized JSON to application resource file (inverse of GetGradesDataAsync)
+        // To be executed on application suspension
+        // TODO should this be called every time a new course, or course item is created?
+        private async Task<bool> SaveGradesDataAsync()
+        {
+            Uri dataUri = new Uri((string)Application.Current.Resources["JsonUriString"]);
+            //StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(dataUri);
+            StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync(
+                (string)Application.Current.Resources["JsonDisplayName"], CreationCollisionOption.ReplaceExisting);
+
+            string jsonString = await JsonConvert.SerializeObjectAsync(_gradesDataSource);
+            await FileIO.WriteTextAsync(file, jsonString);
+            
+            // Determine success based on file availability
+            return file.IsAvailable;
+
+        }
+
+        // Asynchronous static method to load the relevant JSON file, parse it, and 
+        // populate the relevant data structures
         private async Task GetGradesDataAsync()
         {
+            // Ensure grades not already populated (skip if they are)
             if (this._groups.Count != 0)
                 return;
 
-            Uri dataUri = new Uri("ms-appx:///DataModel/GradesData.json");
+            StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(
+                (string)Application.Current.Resources["JsonDisplayName"]);
 
-            StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(dataUri);
-            string jsonText = await FileIO.ReadTextAsync(file);
-            JsonObject jsonObject = JsonObject.Parse(jsonText);
-            JsonArray jsonArray = jsonObject["Groups"].GetArray();
-
-            foreach (JsonValue groupValue in jsonArray)
-            {
-                JsonObject groupObject = groupValue.GetObject();
-                GradesDataGroup group = new GradesDataGroup(groupObject["UniqueId"].GetString(),
-                                                            groupObject["CourseName"].GetString(),
-                                                            groupObject["CourseCode"].GetString(),
-                                                            groupObject["ImagePath"].GetString(),
-                                                            UInt16.Parse(groupObject["CourseUnits"].GetString()),
-                                                            Double.Parse(groupObject["CourseGoal"].GetString()),
-                                                            Double.Parse(groupObject["CourseGrade"].GetString()));
-
-                foreach (JsonValue itemValue in groupObject["Items"].GetArray())
-                {
-                    JsonObject itemObject = itemValue.GetObject();
-                    group.Items.Add(new GradesDataItem(itemObject["UniqueId"].GetString(),
-                                                       itemObject["ItemName"].GetString(),
-                                                       itemObject["ImagePath"].GetString(),
-                                                       itemObject["ItemType"].GetString(),
-                                                       Double.Parse(itemObject["ItemGrade"].GetString()),
-                                                       Double.Parse(itemObject["ItemWeight"].GetString())));
-                }
-                this.Groups.Add(group);
-            }
+            string jsonString = await FileIO.ReadTextAsync(file);
+            _gradesDataSource = JsonConvert.DeserializeObject<GradesDataSource>(jsonString);
 
             RecalculateSessionalGrade(); // Calculate initial sessional grade based on file data
         }
@@ -435,12 +452,14 @@ namespace MarkMaster.Data
         public static string CreateNewItem(string courseUniqueID)
         {
             int itemUniqueID = _gradesDataSource._autoUniqueID++;
-            GradesDataItem newItem = new GradesDataItem((itemUniqueID).ToString(),
-                                                        "New Item",
-                                                        String.Empty,
-                                                        String.Empty,
-                                                        (Double)0,
-                                                        (Double)0);
+            GradesDataItem newItem = new GradesDataItem(
+                (itemUniqueID).ToString(),
+                (string) Application.Current.Resources["DefaultItemName"],
+                String.Empty,
+                (string) Application.Current.Resources["DefaultItemType"],
+                (double) Application.Current.Resources["DefaultItemGrade"],
+                (double) Application.Current.Resources["DefaultItemWeight"]
+                );
 
             ((GradesDataGroup) _gradesDataSource.Groups.Where(course => course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Add(newItem);
             return itemUniqueID.ToString();
@@ -475,23 +494,21 @@ namespace MarkMaster.Data
         public static string CreateNewCourse()
         {
             int courseUniqueID = _gradesDataSource._autoUniqueID++;
-            GradesDataGroup group = new GradesDataGroup((courseUniqueID).ToString(),
-                                                         "New Course",
-                                                         String.Empty,
-                                                         String.Empty,
-                                                         (UInt16)3,
-                                                         (Double)50,
-                                                         (Double)0);
-            // Insert placeholder course item
-            int itemUniqueID = _gradesDataSource._autoUniqueID++;
-            group.Items.Add(new GradesDataItem((itemUniqueID).ToString(),
-                             "New Item",
-                             String.Empty,
-                             String.Empty,
-                             (Double)0,
-                             (Double)0));
+            GradesDataGroup group = new GradesDataGroup(
+                (courseUniqueID).ToString(),
+                (string) Application.Current.Resources["DefaultCourseName"],
+                (string) Application.Current.Resources["DefaultCourseCode"],
+                //(string) Application.Current.Resources["DefaultCourseImagePath"],
+                String.Empty,
+                UInt16.Parse((string) Application.Current.Resources["DefaultCourseUnits"]),
+                (double) Application.Current.Resources["DefaultCourseGoal"],
+                (double) Application.Current.Resources["DefaultCourseGrade"]
+                );
 
+            // Insert placeholder course item
             _gradesDataSource.Groups.Add(group);
+            int itemUniqueID = Int16.Parse(CreateNewItem(courseUniqueID.ToString()));
+
             return (courseUniqueID).ToString();
         }
 
@@ -518,8 +535,6 @@ namespace MarkMaster.Data
                 _gradesDataSource.SessionalGradeTwelve +=
                     gradeScaleConverter.PercentageToGradeScale(course.CourseGrade, "Twelve") * course.CourseUnits;
             }
-            _gradesDataSource.SessionalGrade = (_gradesDataSource.SessionalUnits == 0) ? 
-                0.0 : _gradesDataSource.SessionalGrade / _gradesDataSource.SessionalUnits;
             
             // Avoid divide by zero issues (i.e. NaN results) - just default to 0 for now
             if (_gradesDataSource.SessionalUnits == 0)

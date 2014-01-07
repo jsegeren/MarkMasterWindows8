@@ -11,6 +11,8 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.System;
+using Windows.UI.Popups;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -33,6 +35,7 @@ namespace MarkMaster
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
         private String subjectSearchString;
         private String previousTextBoxString;
+        private String previousComboBoxValue;
 
         /// <summary>
         /// NavigationHelper is used on each page to aid in navigation and 
@@ -87,12 +90,15 @@ namespace MarkMaster
         private async void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             // Set up elements of view model
-            var group = await GradesDataSource.GetGroupAsync((String)e.NavigationParameter);
+            //var group = await GradesDataSource.GetGroupAsync((String)e.NavigationParameter);
             GradesDataSource gradesDataSource = (GradesDataSource)await GradesDataSource.GetDataSourceAsync();
-            //GradesDataGroup group = GradesDataSource.GetGroup((String)e.NavigationParameter);
+            GradesDataGroup group = GradesDataSource.GetGroup((String)e.NavigationParameter);
             this.DefaultViewModel["Group"] = group;
             this.DefaultViewModel["Items"] = group.Items;
             this.DefaultViewModel["IsEditingFlag"] = gradesDataSource.IsEditingFlag;
+
+            // Hide edit fields button for now (force individual editing of fields)
+            editFieldsButton.Visibility = Visibility.Collapsed;
 
             // Populate the combobox with cached list of subjects
             var courseSubjectFile = await
@@ -170,6 +176,17 @@ namespace MarkMaster
         private void Window_SizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
         {
             this.InvalidateVisualState();
+
+            //// Simulate disabling of snap view for now - TODO update with something user-friendly
+            //ApplicationViewState currentViewState = ApplicationView.Value;
+            //if (currentViewState == ApplicationViewState.Snapped)
+            //{
+            //    if (!ApplicationView.TryUnsnap())
+            //    {
+            //        MessageDialog dialog = new MessageDialog((string)Application.Current.Resources["SnappedError"]);
+            //        dialog.ShowAsync();
+            //    }
+            //}
         }
 
         /// <summary>
@@ -274,7 +291,12 @@ namespace MarkMaster
         private void OnEditFieldsClick(object sender, RoutedEventArgs e)
         {
             // TODO Figure out why the view is not aware that the value of the boolean flag has changed
-            if (GradesDataSource.SwitchIsEditingFlag())
+            EnableEditingMode(GradesDataSource.SwitchIsEditingFlag());
+        }
+
+        private void EnableEditingMode(bool enableFlag)
+        {
+            if (enableFlag)
             {
                 pageTitle.Visibility = Visibility.Collapsed;
                 pageTitleEdit.Visibility = Visibility.Visible;
@@ -347,7 +369,6 @@ namespace MarkMaster
         private void courseCodeEdit_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.SetCourseCodeInput();
-            //courseCodeEdit2.Focus(FocusState.Programmatic); // Progress input focus over to code suffix
 
             // Reset the search input buffer
             subjectSearchString = String.Empty;
@@ -365,45 +386,59 @@ namespace MarkMaster
             {
                 courseCode.Text = courseCodeEdit.SelectedValue.ToString();
             }
+            else if (!String.IsNullOrWhiteSpace(previousComboBoxValue))
+            {
+                courseCode.Text = previousComboBoxValue;
+            }
+
             if (!String.IsNullOrEmpty(courseCodeEdit2.Text.ToString()))
             {   
-                courseCode.Text = (courseCodeEdit.SelectedValue == null || String.IsNullOrEmpty(courseCodeEdit.SelectedValue.ToString())) ?
-                    courseCodeEdit2.Text.ToString() : courseCode.Text + " " + courseCodeEdit2.Text.ToString();
+                //courseCode.Text = (courseCodeEdit.SelectedValue == null || String.IsNullOrEmpty(courseCodeEdit.SelectedValue.ToString())) ?
+                    //courseCodeEdit2.Text.ToString() : courseCode.Text + " " + courseCodeEdit2.Text.ToString();
+                courseCode.Text += " " + courseCodeEdit2.Text.ToString();
             }
         }
 
         // TODO fix this -> need to subscribe to key up on underlying scrollviewer; allow more complex searches
         private void courseCodeEdit_KeyUp(object sender, KeyRoutedEventArgs e)
         {
-            subjectSearchString = String.Join(String.Empty, e.Key.ToString());
-            var subjectMatch = ((ComboBox)sender).Items.FirstOrDefault(subject => 
-                ((string)subject).StartsWith(subjectSearchString, StringComparison.CurrentCultureIgnoreCase));
-            if (subjectMatch != null)
-            {
-                ((ComboBox)sender).SelectedItem = subjectMatch;
-                ((ComboBox)sender).IsDropDownOpen = true;
-            }
-            courseCodeEdit2_KeyDown(sender, e);
+            //subjectSearchString = String.Join(String.Empty, e.Key.ToString());
+            //var subjectMatch = ((ComboBox)sender).Items.FirstOrDefault(subject => 
+            //    ((string)subject).StartsWith(subjectSearchString, StringComparison.CurrentCultureIgnoreCase));
+            //if (subjectMatch != null)
+            //{
+            //    ((ComboBox)sender).SelectedItem = subjectMatch;
+            //    ((ComboBox)sender).IsDropDownOpen = true;
+            //}
+            //courseCodeEdit2_KeyDown(sender, e);
         }
 
         private void itemWeightValueEdit_KeyDown(object sender, KeyRoutedEventArgs e)
         {
+            if (e.Key == VirtualKey.Enter || e.Key == VirtualKey.Escape)
+            {
+                EnableEditingMode(false);
+            }
+
             if (!(char.IsDigit((char) e.Key) || ( Char.Equals((char) e.Key, (char) 190) && !((TextBox)sender).Text.Contains('.') ))) {
                 e.Handled = true;
                 return;
             }
 
-            double nextValue;
-            if (Char.Equals((char) e.Key, (char) 190)) {
-                nextValue = Double.Parse((string) ((TextBox)sender).Text.ToString() + ".");
-            }
-            else {
-                nextValue = Double.Parse((string) ((TextBox)sender).Text.ToString() + Convert.ToChar(e.Key));
-            }
+            // Selected text means an overwrite will occur; no need to check for bound errors
+            if (String.IsNullOrWhiteSpace(((TextBox)sender).SelectedText)) {
+                double nextValue;
+                if (Char.Equals((char) e.Key, (char) 190)) {
+                    nextValue = Double.Parse((string) ((TextBox)sender).Text.ToString() + ".");
+                }
+                else {
+                    nextValue = Double.Parse((string) ((TextBox)sender).Text.ToString() + Convert.ToChar(e.Key));
+                }
 
-            if (nextValue > 100.0 || nextValue < 0.0)
-            {
-                e.Handled = true;
+                if (nextValue > 100.0 || nextValue < 0.0)
+                {
+                    e.Handled = true;
+                }
             }
 
         }
@@ -438,6 +473,9 @@ namespace MarkMaster
             readBlock.Visibility = Visibility.Collapsed;
             editBox.Visibility = Visibility.Visible;
             editBox.Focus(FocusState.Programmatic);
+
+            // TODO clean this up; force course code edit to lose focus
+            courseCodeEdit_LostFocus(null, null);
         }
 
         private void TextBoxLostFocus(UIElement readBlock, UIElement editBox)
@@ -457,18 +495,9 @@ namespace MarkMaster
         private void pageTitleEdit_LostFocus(object sender, RoutedEventArgs e)
         {
             TextBoxLostFocus(pageTitle, pageTitleEdit);
-            //pageTitle.Visibility = Visibility.Visible;
-            //pageTitleEdit.Visibility = Visibility.Collapsed;
             if (String.IsNullOrWhiteSpace(pageTitleEdit.Text))
             {
-                if (!String.IsNullOrWhiteSpace(previousTextBoxString))
-                {
-                    pageTitleEdit.Text = previousTextBoxString;
-                }
-                else
-                {
-                    pageTitleEdit.Text = "New Course";
-                }
+                pageTitleEdit.Text = previousTextBoxString;
             }
         }
 
@@ -489,17 +518,22 @@ namespace MarkMaster
 
         private void courseCodeEdit_GotFocus(object sender, RoutedEventArgs e)
         {
+            // Try to prepopulate the input fields if necessary and possible (i.e. on first edit)
+            if (courseCodeEdit.SelectedValue == null && String.IsNullOrWhiteSpace(courseCodeEdit2.Text)
+                && !String.IsNullOrWhiteSpace(courseCode.Text))
+            {
+                var courseCodeStringList = courseCode.Text.Split(' ');
+                previousComboBoxValue = courseCodeStringList[0];
+                //courseCodeEdit.SelectedValue = courseCodeStringList[0]; // TODO figure this out
+                courseCodeEdit2.Text = courseCodeStringList[1];
+            } 
+
             OnTextBoxFocus(courseCodeEdit2, e);
         }
 
         private void courseCodeEdit_LostFocus(object sender, RoutedEventArgs e)
         {
             TextBoxLostFocus(courseCode, courseCodeEditPanel);
-            //courseCode.Visibility = Visibility.Visible;
-            //courseCodeEditPanel.Visibility = Visibility.Collapsed;
-            var codeStringList = courseCode.Text.Split(' ');
-            courseCodeEdit2.Text = (String.IsNullOrWhiteSpace(courseCode.Text) || codeStringList.Length <= 1) ?
-                "1A03" : codeStringList.Last();
         }
 
         private void courseCodeEdit2_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -550,6 +584,47 @@ namespace MarkMaster
             TextBoxLostFocus(itemSubtitle, itemSubtitleEdit);
         }
 
+        private void courseGoal_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            TextBlockTapped(courseGoal, courseGoalEdit);
+        }
+
+        private void courseGoalEdit_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBoxLostFocus(courseGoal, courseGoalEdit);
+            if (String.IsNullOrWhiteSpace(courseGoalEdit.Text))
+            {
+                courseGoalEdit.Text = previousTextBoxString;
+            }
+        }
+
+        private void itemWeightValue_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            TextBlockTapped(itemWeightValue, itemWeightValueEdit);
+        }
+
+        private void itemWeightValueEdit_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBoxLostFocus(itemWeightValue, itemWeightValueEdit);
+            if (String.IsNullOrWhiteSpace(itemWeightValueEdit.Text))
+            {
+                itemWeightValueEdit.Text = previousTextBoxString;
+            }
+        }
+
+        private void itemGradeValueEdit_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBoxLostFocus(itemGradeValue, itemGradeValueEdit);
+            if (String.IsNullOrWhiteSpace(itemGradeValueEdit.Text))
+            {
+                itemGradeValueEdit.Text = previousTextBoxString;
+            }
+        }
+
+        private void itemGradeValue_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            TextBlockTapped(itemGradeValue, itemGradeValueEdit);
+        }
 
     }
 }

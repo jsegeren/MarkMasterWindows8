@@ -1,4 +1,5 @@
 ﻿using MarkMaster.Common;
+using MarkMaster.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -152,6 +153,10 @@ namespace MarkMaster
         private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
+            
+            // First, make sure grades data is properly serialized, saved
+            await GradesDataSource.SaveDataSourceAsync();
+
             await SuspensionManager.SaveAsync();
             deferral.Complete();
         }

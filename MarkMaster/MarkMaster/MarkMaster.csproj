@@ -130,7 +130,6 @@
     </Content>
     <None Include="Common\ReadMe.txt" />
     <None Include="MarkMaster_TemporaryKey.pfx" />
-    <Content Include="DataModel\GradesData.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
