@@ -125,6 +125,7 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <Content Include="Assets\2000px-McMaster_University_logo.png" />
     <Content Include="Assets\Subjects_McMaster_Jan_2014.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

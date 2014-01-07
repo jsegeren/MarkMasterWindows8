@@ -498,8 +498,7 @@ namespace MarkMaster.Data
                 (courseUniqueID).ToString(),
                 (string) Application.Current.Resources["DefaultCourseName"],
                 (string) Application.Current.Resources["DefaultCourseCode"],
-                //(string) Application.Current.Resources["DefaultCourseImagePath"],
-                String.Empty,
+                (string)Application.Current.Resources["DefaultCourseImagePath"],
                 UInt16.Parse((string) Application.Current.Resources["DefaultCourseUnits"]),
                 (double) Application.Current.Resources["DefaultCourseGoal"],
                 (double) Application.Current.Resources["DefaultCourseGrade"]
