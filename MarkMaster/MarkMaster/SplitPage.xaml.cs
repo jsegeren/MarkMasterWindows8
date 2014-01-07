@@ -415,10 +415,7 @@ namespace MarkMaster
 
         private void itemWeightValueEdit_KeyDown(object sender, KeyRoutedEventArgs e)
         {
-            if (e.Key == VirtualKey.Enter || e.Key == VirtualKey.Escape)
-            {
-                EnableEditingMode(false);
-            }
+            defocus_KeyDown(sender, e);
 
             if (!(char.IsDigit((char) e.Key) || ( Char.Equals((char) e.Key, (char) 190) && !((TextBox)sender).Text.Contains('.') ))) {
                 e.Handled = true;
@@ -482,6 +479,13 @@ namespace MarkMaster
         {
             readBlock.Visibility = Visibility.Visible;
             editBox.Visibility = Visibility.Collapsed;
+
+            // Simple hack fix to hide virtual keyboard on textbox defocus
+            if (editBox is TextBox) {
+                ((TextBox)editBox).IsEnabled = false;
+                ((TextBox)editBox).IsEnabled = true;
+            }
+
         }
 
         private void OnTextBoxFocus(object sender, RoutedEventArgs e)
@@ -501,12 +505,17 @@ namespace MarkMaster
             }
         }
 
-        private void pageTitleEdit_KeyDown(object sender, KeyRoutedEventArgs e)
+        private void defocus_KeyDown(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == VirtualKey.Enter || e.Key == VirtualKey.Escape)
             {
-                pageTitleEdit_LostFocus(sender, null);
+                EnableEditingMode(false);
             }
+        }
+
+        private void AlphaEditBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            defocus_KeyDown(sender, e);
         }
 
         private void courseCode_Tapped(object sender, TappedRoutedEventArgs e)
@@ -624,6 +633,14 @@ namespace MarkMaster
         private void itemGradeValue_Tapped(object sender, TappedRoutedEventArgs e)
         {
             TextBlockTapped(itemGradeValue, itemGradeValueEdit);
+        }
+
+        private void defocus_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (!(e.OriginalSource is TextBlock))
+            {
+                EnableEditingMode(false);
+            }
         }
 
     }
