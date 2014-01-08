@@ -11,6 +11,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.System;
+using Windows.UI;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -640,6 +641,41 @@ namespace MarkMaster
             if (!(e.OriginalSource is TextBlock))
             {
                 EnableEditingMode(false);
+            }
+        }
+
+        // TODO - Use data binding instead? Check if weight change causes the total item weight
+        // associated with the course exceeds 100. This case is allowed for courses incorporating
+        // bonus components; however, warning should be displayed to user in case accidental
+        private void ItemWeight_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (((GradesDataGroup)this.DefaultViewModel["Group"]).Items.Select(item => item.ItemWeight).Sum() > 100)
+            {
+                itemWeightWarning.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                itemWeightWarning.Visibility = Visibility.Collapsed;
+            }
+            ResetCourseGradeColor();
+        }
+
+        // TODO - Use data binding instead? Set color of course grade based on comparison with course goal
+        private void CourseGoal_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            ResetCourseGradeColor();
+        }
+
+        private void ResetCourseGradeColor()
+        {
+            GradesDataGroup currentCourse = (GradesDataGroup) this.DefaultViewModel["Group"];
+            if (currentCourse.CourseGrade < currentCourse.CourseGoal)
+            {
+                courseGrade.Foreground = new SolidColorBrush(Color.FromArgb(255, 180, 132, 23));
+            }
+            else
+            {
+                courseGrade.Foreground = new SolidColorBrush(Color.FromArgb(255, 95, 55, 190));
             }
         }
 

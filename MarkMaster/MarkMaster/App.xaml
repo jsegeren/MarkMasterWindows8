@@ -20,6 +20,7 @@
         
         <x:String x:Key="DefaultItemName">New Item</x:String>
         <x:String x:Key="DefaultItemType">Assignment</x:String>
+        <x:String x:Key="DefaultItemImagePath">Assets/2000px-McMaster_University_logo.png</x:String>
         <x:Double x:Key="DefaultItemWeight">0</x:Double>
         <x:Double x:Key="DefaultItemGrade">0</x:Double>
 

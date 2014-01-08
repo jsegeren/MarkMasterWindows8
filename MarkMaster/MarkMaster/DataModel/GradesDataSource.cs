@@ -451,14 +451,22 @@ namespace MarkMaster.Data
         // for subsequent element focus in the list
         public static string CreateNewItem(string courseUniqueID)
         {
+            // Set default weight to be remainder of total weight for course (i.e. 100 - sum of existing item weights)
+            double defaultItemWeight = 100 - _gradesDataSource.Groups.Where(course => 
+                course.UniqueId == courseUniqueID).FirstOrDefault().Items.Select(item => item.ItemWeight).Sum();
+            if (defaultItemWeight < 0) {
+                defaultItemWeight = 0;
+            }
+
             int itemUniqueID = _gradesDataSource._autoUniqueID++;
             GradesDataItem newItem = new GradesDataItem(
                 (itemUniqueID).ToString(),
                 (string) Application.Current.Resources["DefaultItemName"],
-                String.Empty,
+                (string) Application.Current.Resources["DefaultItemImagePath"],
                 (string) Application.Current.Resources["DefaultItemType"],
                 (double) Application.Current.Resources["DefaultItemGrade"],
-                (double) Application.Current.Resources["DefaultItemWeight"]
+                //(double) Application.Current.Resources["DefaultItemWeight"]
+                defaultItemWeight
                 );
 
             ((GradesDataGroup) _gradesDataSource.Groups.Where(course => course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Add(newItem);
