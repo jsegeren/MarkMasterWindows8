@@ -45,28 +45,28 @@ namespace MarkMaster
             }
         }
 
-        private async void RetrieveCourseData()
-        {
-            // First retrieve the JSON from the timetable generating website (credits to TODO who?)
-            HttpClient hyperTextClient = new HttpClient();
-            Uri courseDataURL = new Uri("http://www.timetablegenerator.com/data/mcmaster_data.json");
-            HttpResponseMessage hyperTextResponse = await hyperTextClient.GetAsync(courseDataURL);
+        //private async void RetrieveCourseData()
+        //{
+        //    // First retrieve the JSON from the timetable generating website (credits to TODO who?)
+        //    HttpClient hyperTextClient = new HttpClient();
+        //    Uri courseDataURL = new Uri("http://www.timetablegenerator.com/data/mcmaster_data.json");
+        //    HttpResponseMessage hyperTextResponse = await hyperTextClient.GetAsync(courseDataURL);
 
-            if (hyperTextResponse.StatusCode == HttpStatusCode.Ok)
-            {
-                CourseJSONData = await hyperTextResponse.Content.ReadAsStringAsync();
+        //    if (hyperTextResponse.StatusCode == HttpStatusCode.Ok)
+        //    {
+        //        CourseJSONData = await hyperTextResponse.Content.ReadAsStringAsync();
 
-                // Then parse the JSON response
-                var resultItem = JsonConvert.DeserializeObject(CourseJSONData);
-            }
-            else
-            {
-                throw new Exception(hyperTextResponse.StatusCode.ToString() + " " + hyperTextResponse.ReasonPhrase);
-            }
+        //        // Then parse the JSON response
+        //        var resultItem = JsonConvert.DeserializeObject(CourseJSONData);
+        //    }
+        //    else
+        //    {
+        //        throw new Exception(hyperTextResponse.StatusCode.ToString() + " " + hyperTextResponse.ReasonPhrase);
+        //    }
 
-            return;
+        //    return;
             
-        }
+        //}
 
 
         /// <summary>

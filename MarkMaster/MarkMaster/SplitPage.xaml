@@ -301,7 +301,7 @@
                         Value="{Binding ItemGrade, Mode=TwoWay}" SmallChange="0.1" StepFrequency="0.1" IsThumbToolTipEnabled="False"
                         ValueChanged="CourseGoal_ValueChanged"/>
                 <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock x:Name="itemWeightWarning" Text="Note: total weight of course items exceeds 100"
+                    <TextBlock x:Name="itemWeightWarning" Text="Note: total weight of course items exceeds 100%"
                                Style="{StaticResource TitleTextBlockStyle}" Foreground="#FFB48417" IsTextSelectionEnabled="False"
                                Visibility="Visible"/>
                 </StackPanel>

@@ -14,7 +14,11 @@
     <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PackageCertificateKeyFile>MarkMaster_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateKeyFile>MarkMaster_StoreKey.pfx</PackageCertificateKeyFile>
+    <AppxBundle>Auto</AppxBundle>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxBundlePlatforms>neutral</AppxBundlePlatforms>
+    <PackageCertificateThumbprint>9831DA9BCA6414AE06C9BD4F26EAA12FA0F4EFA4</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -125,19 +129,21 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="Assets\2000px-McMaster_University_logo.png" />
+    <Content Include="Assets\Mad_Logo.png" />
+    <Content Include="Assets\MarkMasterLogo.scale-100.png" />
+    <Content Include="Assets\MarkMasterSmallLogo.scale-100.png" />
+    <Content Include="Assets\MarkMasterSplash.scale-100.png" />
+    <Content Include="Assets\MarkMasterStoreLogo.png" />
     <Content Include="Assets\Subjects_McMaster_Jan_2014.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="MarkMaster_StoreKey.pfx" />
+    <None Include="Package.StoreAssociation.xml" />
     <None Include="Common\ReadMe.txt" />
     <None Include="MarkMaster_TemporaryKey.pfx" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Logo.scale-100.png" />
-    <Content Include="Assets\SmallLogo.scale-100.png" />
-    <Content Include="Assets\SplashScreen.scale-100.png" />
-    <Content Include="Assets\StoreLogo.scale-100.png" />
     <Content Include="Assets\LightGray.png" />
     <Content Include="Assets\MediumGray.png" />
     <Content Include="Assets\DarkGray.png" />

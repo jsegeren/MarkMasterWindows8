@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -438,11 +439,21 @@ namespace MarkMaster.Data
             if (this._groups.Count != 0)
                 return;
 
-            StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(
-                (string)Application.Current.Resources["JsonDisplayName"]);
+            StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync(
+                (string)Application.Current.Resources["JsonDisplayName"], CreationCollisionOption.OpenIfExists);
 
             string jsonString = await FileIO.ReadTextAsync(file);
-            _gradesDataSource = JsonConvert.DeserializeObject<GradesDataSource>(jsonString);
+
+            // Check if file just created -> create new instance of grades data source
+            if (String.IsNullOrWhiteSpace(jsonString))
+            {
+                _gradesDataSource = new GradesDataSource();
+                CreateNewCourse(); // Create initial course to help guide user
+            }
+            else
+            {
+                _gradesDataSource = JsonConvert.DeserializeObject<GradesDataSource>(jsonString);
+            }
 
             RecalculateSessionalGrade(); // Calculate initial sessional grade based on file data
         }

@@ -1,41 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-
-  <Identity Name="d01d28da-be3d-4292-bff4-0aeb5c929725"
-            Publisher="CN=Josh"
-            Version="1.0.0.0" />
-
+  <Identity Name="44505JoshuaSegeren.MarkMaster" Publisher="CN=57DBB795-89EF-410A-96FF-5A3C720214BA" Version="0.9.0.0" />
   <Properties>
     <DisplayName>MarkMaster</DisplayName>
-    <PublisherDisplayName>Josh</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
+    <PublisherDisplayName>Joshua Segeren</PublisherDisplayName>
+    <Logo>Assets\MarkMasterStoreLogo.png</Logo>
   </Properties>
-
   <Prerequisites>
     <OSMinVersion>6.3.0</OSMinVersion>
     <OSMaxVersionTested>6.3.0</OSMaxVersionTested>
   </Prerequisites>
-
   <Resources>
-    <Resource Language="x-generate"/>
+    <Resource Language="x-generate" />
   </Resources>
-
   <Applications>
-    <Application Id="App"
-        Executable="$targetnametoken$.exe"
-        EntryPoint="MarkMaster.App">
-        <m2:VisualElements
-            DisplayName="MarkMaster"
-            Square150x150Logo="Assets\Logo.png"
-            Square30x30Logo="Assets\SmallLogo.png"
-            Description="MarkMaster"
-            ForegroundText="light"
-            BackgroundColor="#464646">
-            <m2:SplashScreen Image="Assets\SplashScreen.png" />
-        </m2:VisualElements>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="MarkMaster.App">
+      <m2:VisualElements DisplayName="MarkMaster" Square150x150Logo="Assets\MarkMasterLogo.png" Square30x30Logo="Assets\MarkMasterSmallLogo.png" Description="MarkMaster" ForegroundText="light" BackgroundColor="#464646">
+        <m2:SplashScreen Image="Assets\MarkMasterSplash.png" BackgroundColor="#414141" />
+        <m2:InitialRotationPreference>
+          <m2:Rotation Preference="landscape" />
+        </m2:InitialRotationPreference>
+        <m2:ApplicationView MinWidth="width500" />
+      </m2:VisualElements>
     </Application>
   </Applications>
-  <Capabilities>
-    <Capability Name="internetClient" />
-  </Capabilities>
 </Package>
