@@ -102,7 +102,7 @@
                                Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="35"/>
                     <Slider Grid.Column="1" Margin="50,0,0,0" VerticalAlignment="Center"
                         Value="{Binding CourseUnits, Mode=TwoWay}" Orientation="Horizontal" SmallChange="1" 
-                            StepFrequency="1" IsThumbToolTipEnabled="False" Height="35" Maximum="6" Minimum="1" LargeChange="1" 
+                            StepFrequency="1" IsThumbToolTipEnabled="False" Height="35" Maximum="12" Minimum="1" LargeChange="1" 
                             GotFocus="Slider_GotFocus"/>
                 </Grid>
                 <TextBlock x:Name="courseGoalLabel" Margin="0,10,0,5" Text="Course Goal" Style="{StaticResource SubtitleTextBlockStyle}"/>
@@ -266,9 +266,11 @@
                     <TextBlock x:Name="itemSubtitleLabel" Margin="0,20,0,5" Text="Item Type" Style="{StaticResource SubtitleTextBlockStyle}"/>
                     <TextBlock x:Name="itemSubtitle" Margin="0,0,0,0" Text="{Binding ItemType}" Style="{StaticResource SubheaderTextBlockStyle}" 
                                FontSize="25" Tapped="itemSubtitle_Tapped" />
-                    <TextBox x:Name="itemSubtitleEdit" Margin="0,10,0,10" Text="{Binding ItemType, Mode=TwoWay}" Visibility="Collapsed"
+                    <!--<TextBox x:Name="itemSubtitleEdit" Margin="0,10,0,10" Text="{Binding ItemType, Mode=TwoWay}" Visibility="Collapsed"
                              Background="{x:Null}" Foreground="White" FontSize="20"
-                             GotFocus="OnTextBoxFocus" LostFocus="itemSubtitleEdit_LostFocus" KeyDown="AlphaEditBox_KeyDown"/>
+                             GotFocus="OnTextBoxFocus" LostFocus="itemSubtitleEdit_LostFocus" KeyDown="AlphaEditBox_KeyDown"/>-->
+                    <ComboBox x:Name="itemSubtitleEditCombo" SelectedValue="{Binding ItemType, Mode=TwoWay}" Margin="0,10,0,10" Width="250" Height="40" 
+                              Visibility="Collapsed" Background="{x:Null}" Foreground="White" FontSize="20" DropDownClosed="itemSubtitleEdit_SelectionMade" />
                 </StackPanel>
                 <StackPanel x:Name="itemWeightLabel" Grid.Row="1" Grid.Column="0" Margin="0,0,20,20" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Margin="0,0,0,0" Text="Weight" Style="{StaticResource SubtitleTextBlockStyle}"/>

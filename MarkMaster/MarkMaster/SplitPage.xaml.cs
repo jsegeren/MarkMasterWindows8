@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 using Windows.ApplicationModel;
 using Windows.Foundation;
@@ -36,7 +37,12 @@ namespace MarkMaster
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
         private String subjectSearchString;
         private String previousTextBoxString;
-        private String previousComboBoxValue;
+
+        private Dictionary<UIElement, UIElement> readToEditUIEements;
+        private Dictionary<UIElement, UIElement> editToReadUIElements;
+
+        // TODO autosort these alphabetically when populating the combobox
+        private static HashSet<String> itemTypeValues = new HashSet<String>{"Lab", "Assignment", "Tutorial", "Test", "Final", "Paper", "Project", "Presentation", "Other" };
 
         /// <summary>
         /// NavigationHelper is used on each page to aid in navigation and 
@@ -75,6 +81,23 @@ namespace MarkMaster
             //Window.Current.SizeChanged += Window_SizeChanged;
             this.InvalidateVisualState();
 
+            // Set up the map of read-only -> edit UI elements
+            readToEditUIEements = new Dictionary<UIElement, UIElement>()
+            {
+                { pageTitle, pageTitleEdit },
+                { courseCode, courseCodeEditPanel },
+                { courseGoal, courseGoalEdit },
+                { itemTitle, itemTitleEdit },
+                { itemSubtitle, itemSubtitleEditCombo }
+            };
+            editToReadUIElements = new Dictionary<UIElement, UIElement>()
+            {
+                { pageTitleEdit, pageTitle },
+                { courseCodeEditPanel, courseCode },
+                { courseGoalEdit, courseGoal },
+                { itemTitleEdit, itemTitle },
+                { itemSubtitleEditCombo, itemSubtitle }
+            };
         }
 
         /// <summary>
@@ -101,11 +124,14 @@ namespace MarkMaster
             // Hide edit fields button for now (force individual editing of fields)
             editFieldsButton.Visibility = Visibility.Collapsed;
 
-            // Populate the combobox with cached list of subjects
+            // Populate the course code combobox with cached list of subjects
             var courseSubjectFile = await
                 Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Subjects_McMaster_Jan_2014.csv");
-            IList<string> courseSubjects = await FileIO.ReadLinesAsync(courseSubjectFile);
+            IList<String> courseSubjects = await FileIO.ReadLinesAsync(courseSubjectFile);
             courseCodeEdit.ItemsSource = courseSubjects;
+
+            // Populate the item types combo box
+            itemSubtitleEditCombo.ItemsSource = itemTypeValues.ToList();
 
             if (e.PageState == null)
             {
@@ -297,53 +323,63 @@ namespace MarkMaster
 
         private void EnableEditingMode(bool enableFlag)
         {
-            if (enableFlag)
+            foreach (UIElement readElement in readToEditUIEements.Keys)
             {
-                pageTitle.Visibility = Visibility.Collapsed;
-                pageTitleEdit.Visibility = Visibility.Visible;
-
-                courseCode.Visibility = Visibility.Collapsed;
-                courseCodeEditPanel.Visibility = Visibility.Visible;
-
-                courseGoal.Visibility = Visibility.Collapsed;
-                courseGoalEdit.Visibility = Visibility.Visible;
-
-                itemTitle.Visibility = Visibility.Collapsed;
-                itemTitleEdit.Visibility = Visibility.Visible;
-
-                itemSubtitle.Visibility = Visibility.Collapsed;
-                itemSubtitleEdit.Visibility = Visibility.Visible;
-
-                itemWeightValue.Visibility = Visibility.Collapsed;
-                itemWeightValueEdit.Visibility = Visibility.Visible;
-
-                itemGradeValue.Visibility = Visibility.Collapsed;
-                itemGradeValueEdit.Visibility = Visibility.Visible;
+                if (readElement != itemSubtitle)
+                {
+                    readElement.Visibility = (enableFlag) ? Visibility.Collapsed : Visibility.Visible;
+                    readToEditUIEements[readElement].Visibility = (enableFlag) ? Visibility.Visible : Visibility.Collapsed;
+                }
             }
 
-            else
-            {
-                pageTitle.Visibility = Visibility.Visible;
-                pageTitleEdit.Visibility = Visibility.Collapsed;
+            //if (enableFlag) { 
+                //pageTitle.Visibility = Visibility.Collapsed;
+                //pageTitleEdit.Visibility = Visibility.Visible;
 
-                courseCode.Visibility = Visibility.Visible;
-                courseCodeEditPanel.Visibility = Visibility.Collapsed;
+                //courseCode.Visibility = Visibility.Collapsed;
+                //courseCodeEditPanel.Visibility = Visibility.Visible;
 
-                courseGoal.Visibility = Visibility.Visible;
-                courseGoalEdit.Visibility = Visibility.Collapsed;
+                //courseGoal.Visibility = Visibility.Collapsed;
+                //courseGoalEdit.Visibility = Visibility.Visible;
 
-                itemTitle.Visibility = Visibility.Visible;
-                itemTitleEdit.Visibility = Visibility.Collapsed;
+                //itemTitle.Visibility = Visibility.Collapsed;
+                //itemTitleEdit.Visibility = Visibility.Visible;
 
-                itemSubtitle.Visibility = Visibility.Visible;
-                itemSubtitleEdit.Visibility = Visibility.Collapsed;
+                ////itemSubtitle.Visibility = Visibility.Collapsed;
+                ////itemSubtitleEdit.Visibility = Visibility.Visible;
+                ////itemSubtitleEditCombo.Visibility = Visibility.Visible;
 
-                itemWeightValue.Visibility = Visibility.Visible;
-                itemWeightValueEdit.Visibility = Visibility.Collapsed;
+                //itemWeightValue.Visibility = Visibility.Collapsed;
+                //itemWeightValueEdit.Visibility = Visibility.Visible;
 
-                itemGradeValue.Visibility = Visibility.Visible;
-                itemGradeValueEdit.Visibility = Visibility.Collapsed;
-            }
+                //itemGradeValue.Visibility = Visibility.Collapsed;
+                //itemGradeValueEdit.Visibility = Visibility.Visible;
+            //}
+
+            //else
+            //{
+            //    pageTitle.Visibility = Visibility.Visible;
+            //    pageTitleEdit.Visibility = Visibility.Collapsed;
+
+            //    courseCode.Visibility = Visibility.Visible;
+            //    courseCodeEditPanel.Visibility = Visibility.Collapsed;
+
+            //    courseGoal.Visibility = Visibility.Visible;
+            //    courseGoalEdit.Visibility = Visibility.Collapsed;
+
+            //    itemTitle.Visibility = Visibility.Visible;
+            //    itemTitleEdit.Visibility = Visibility.Collapsed;
+
+            //    //itemSubtitle.Visibility = Visibility.Visible;
+            //    //itemSubtitleEdit.Visibility = Visibility.Collapsed;
+            //    //itemSubtitleEditCombo.Visibility = Visibility.Collapsed;
+
+            //    itemWeightValue.Visibility = Visibility.Visible;
+            //    itemWeightValueEdit.Visibility = Visibility.Collapsed;
+
+            //    itemGradeValue.Visibility = Visibility.Visible;
+            //    itemGradeValueEdit.Visibility = Visibility.Collapsed;
+            //}
         }
 
         private void OnAddItemClick(object sender, RoutedEventArgs e)
@@ -369,10 +405,15 @@ namespace MarkMaster
 
         private void courseCodeEdit_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.SetCourseCodeInput();
-
+            SetCourseCodeInput();
             // Reset the search input buffer
             subjectSearchString = String.Empty;
+        }
+
+        private void itemSubtitleEdit_SelectionMade(object sender, object e)
+        {
+            ((UIElement)sender).Visibility = Visibility.Collapsed;
+            editToReadUIElements[(UIElement)sender].Visibility = Visibility.Visible;
         }
 
         private void courseCodeEdit2_TextChanged(object sender, TextChangedEventArgs e)
@@ -383,20 +424,19 @@ namespace MarkMaster
         private void SetCourseCodeInput()
         {
             // Set text value of course code text to string of selected element in course code list (combobox)
-            if (courseCodeEdit.SelectedValue != null && !String.IsNullOrEmpty(courseCodeEdit.SelectedValue.ToString()))
-            {
-                courseCode.Text = courseCodeEdit.SelectedValue.ToString();
-            }
-            else if (!String.IsNullOrWhiteSpace(previousComboBoxValue))
-            {
-                courseCode.Text = previousComboBoxValue;
-            }
+            courseCode.Text = (courseCodeEdit.SelectedValue == null || String.IsNullOrWhiteSpace(courseCodeEdit.SelectedValue.ToString())) ?
+                String.Empty : courseCodeEdit.SelectedValue.ToString();
 
             if (!String.IsNullOrEmpty(courseCodeEdit2.Text.ToString()))
             {   
                 //courseCode.Text = (courseCodeEdit.SelectedValue == null || String.IsNullOrEmpty(courseCodeEdit.SelectedValue.ToString())) ?
                     //courseCodeEdit2.Text.ToString() : courseCode.Text + " " + courseCodeEdit2.Text.ToString();
                 courseCode.Text += " " + courseCodeEdit2.Text.ToString();
+            }
+
+            if (String.IsNullOrWhiteSpace(courseCode.Text))
+            {
+                courseCode.Text = "Sample 1A03";
             }
         }
 
@@ -466,14 +506,21 @@ namespace MarkMaster
             TextBlockTapped(pageTitle, pageTitleEdit);
         }
 
-        private void TextBlockTapped(UIElement readBlock, TextBox editBox)
+        private void TextBlockTapped(UIElement readBlock, UIElement editBox)
         {
             readBlock.Visibility = Visibility.Collapsed;
             editBox.Visibility = Visibility.Visible;
-            editBox.Focus(FocusState.Programmatic);
+            if (editBox is TextBox)
+            {
+                ((TextBox) editBox).Focus(FocusState.Programmatic);
+            }
+            else if (editBox is ComboBox)
+            {
+                ((ComboBox)editBox).Focus(FocusState.Programmatic);
+            }
 
             // TODO clean this up; force course code edit to lose focus
-            courseCodeEdit_LostFocus(null, null);
+            //courseCodeEdit_LostFocus(null, null);
         }
 
         private void TextBoxLostFocus(UIElement readBlock, UIElement editBox)
@@ -528,21 +575,56 @@ namespace MarkMaster
 
         private void courseCodeEdit_GotFocus(object sender, RoutedEventArgs e)
         {
-            // Try to prepopulate the input fields if necessary and possible (i.e. on first edit)
-            if (courseCodeEdit.SelectedValue == null && String.IsNullOrWhiteSpace(courseCodeEdit2.Text)
-                && !String.IsNullOrWhiteSpace(courseCode.Text))
+            // Try to prepopulate input fields if necessary and possible (i.e. on first edit)
+            if (courseCodeEdit.SelectedValue == null && String.IsNullOrWhiteSpace(courseCodeEdit2.Text) && 
+                !String.IsNullOrWhiteSpace(courseCode.Text))
             {
-                var courseCodeStringList = courseCode.Text.Split(' ');
-                previousComboBoxValue = courseCodeStringList[0];
-                //courseCodeEdit.SelectedValue = courseCodeStringList[0]; // TODO figure this out
-                courseCodeEdit2.Text = courseCodeStringList[1];
-            } 
+                Regex regex = new Regex(@"\s\d[A-Z]\w\d$", RegexOptions.IgnoreCase);
+                Match match = regex.Match(courseCode.Text);
+                if (match.Success)
+                {
+                    courseCodeEdit2.Text = match.Value.Substring(1);
 
-            OnTextBoxFocus(courseCodeEdit2, e);
+                    // TODO figure this out -- scrolling gets stuck if we use SelectedIndex
+                    //courseCodeEdit.SelectedItem = courseCodeEdit.Items.First(item => item.ToString() == 
+                    //    courseCode.Text.Substring(0, courseCode.Text.Length - match.Length)).ToString();
+
+                    String expected = courseCode.Text.Substring(0, courseCode.Text.Length - match.Length);                    
+                    int codePrefixIndex = 0;
+
+                    //foreach (String courseCodePrefix in courseCodeEdit.Items.ToList())
+                    //{
+                    //    if (String.Equals(courseCodePrefix, expected))
+                    //    {
+                    //        //courseCodeEdit.SelectedIndex = codePrefixIndex;
+                    //        break;
+                    //    }
+                    //    codePrefixIndex++;
+                    //} 
+                }
+
+                OnTextBoxFocus(courseCodeEdit2, e);
+            }
         }
+
+        //private void courseCodeEdit_GotFocus(object sender, RoutedEventArgs e)
+        //{
+        //    // Try to prepopulate the input fields if necessary and possible (i.e. on first edit)
+        //    if (courseCodeEdit.SelectedValue == null && String.IsNullOrWhiteSpace(courseCodeEdit2.Text)
+        //        && !String.IsNullOrWhiteSpace(courseCode.Text))
+        //    {
+        //        var courseCodeStringList = courseCode.Text.Split(' ');
+        //        previousComboBoxValue = courseCodeStringList[0];
+        //        //courseCodeEdit.SelectedValue = courseCodeStringList[0]; // TODO figure this out
+        //        courseCodeEdit2.Text = courseCodeStringList[1];
+        //    } 
+
+        //    OnTextBoxFocus(courseCodeEdit2, e);
+        //}
 
         private void courseCodeEdit_LostFocus(object sender, RoutedEventArgs e)
         {
+            this.SetCourseCodeInput();
             TextBoxLostFocus(courseCode, courseCodeEditPanel);
         }
 
@@ -577,8 +659,13 @@ namespace MarkMaster
 
         private void itemSubtitle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            TextBlockTapped(itemSubtitle, itemSubtitleEdit);
+            TextBlockTapped(itemSubtitle, itemSubtitleEditCombo);
         }
+
+        //private void itemSubtitleEdit_Tapped(object sender, TappedRoutedEventArgs e)
+        //{
+        //    TextBlockTapped(itemSubtitleEditCombo, itemSubtitle);
+        //}
 
         private void itemTitleEdit_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -587,12 +674,12 @@ namespace MarkMaster
             TextBoxLostFocus(itemTitle, itemTitleEdit);
         }
 
-        private void itemSubtitleEdit_LostFocus(object sender, RoutedEventArgs e)
-        {
-            itemSubtitleEdit.Text = (String.IsNullOrWhiteSpace(itemSubtitleEdit.Text)) ?
-                "New Item Type" : itemSubtitleEdit.Text;
-            TextBoxLostFocus(itemSubtitle, itemSubtitleEdit);
-        }
+        //private void itemSubtitleEdit_LostFocus(object sender, RoutedEventArgs e)
+        //{
+        //    itemSubtitleEdit.Text = (String.IsNullOrWhiteSpace(itemSubtitleEdit.Text)) ?
+        //        "New Item Type" : itemSubtitleEdit.Text;
+        //    TextBoxLostFocus(itemSubtitle, itemSubtitleEdit);
+        //}
 
         private void courseGoal_Tapped(object sender, TappedRoutedEventArgs e)
         {
@@ -677,6 +764,11 @@ namespace MarkMaster
             {
                 courseGrade.Foreground = new SolidColorBrush(Color.FromArgb(255, 95, 55, 190));
             }
+        }
+
+        private void itemSubtitleEditCombo_DropDownClosed(object sender, object e)
+        {
+
         }
 
     }

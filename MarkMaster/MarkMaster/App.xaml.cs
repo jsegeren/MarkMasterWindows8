@@ -3,9 +3,12 @@ using MarkMaster.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.RegularExpressions;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Data.Json;
@@ -31,18 +34,98 @@ namespace MarkMaster
     {
 
         // Shared data - global across app pages
-        private string _courseJSONData;
-
-        public string CourseJSONData
+        // Department names -> course code 
+        private Dictionary<String, HashSet<McMasterCourse>> _departmentToCoursesMap;
+        public Dictionary<String, HashSet<McMasterCourse>> DepartmentToCoursesMap
         {
             get
             {
-                return _courseJSONData;
+                return _departmentToCoursesMap;
             }
             set
             {
-                _courseJSONData = value;
+                _departmentToCoursesMap = value;
             }
+        }
+
+        private Dictionary<McMasterCourse, String> _courseToNameMap;
+        public Dictionary<McMasterCourse, String> CourseToNameMap
+        {
+            get
+            {
+                return _courseToNameMap;
+            }
+            set
+            {
+                _courseToNameMap = value;
+            }
+        }
+
+        /**
+         * Method to manually retrieve course data from the McMaster registar website directly
+         **/
+        private async void RetrieveCourseData()
+        {
+            HttpClient httpClient = new HttpClient();
+            Uri sourceDataUrl = new Uri("https://adweb.cis.mcmaster.ca/mtt/U201409.html");
+            HttpResponseMessage httpResponse = await httpClient.GetAsync(sourceDataUrl);
+            DepartmentToCoursesMap = new Dictionary<string, HashSet<McMasterCourse>>();
+            CourseToNameMap = new Dictionary<McMasterCourse, string>();
+
+            if (httpResponse.StatusCode == HttpStatusCode.Ok)
+            {
+                string responseString = await httpResponse.Content.ReadAsStringAsync();
+                responseString.ToString();
+
+                // Now parse the raw HTML
+                IList<String> departmentDataList = responseString.FindElements("<p>&nbsp;</p>", 
+                    new List<String>() { "</table></td></tr><tr><td class=label colspan=10>" });
+                foreach (String departmentData in departmentDataList)
+                {
+                    String departmentName = departmentData.Split(new string[] { "</td>" }, StringSplitOptions.RemoveEmptyEntries)[0];
+                    IList<String> courseDataList = departmentData.FindElements("<td", new List<String>() { "</table></td></tr><tr>" });
+                    foreach (String courseData in courseDataList)
+                    {
+                        string[] courseMetaList = courseData.Split(new string[] { "&nbsp;" }, StringSplitOptions.RemoveEmptyEntries);
+                        String courseCode = courseMetaList[1];
+                        String courseName = courseMetaList[3];
+                        McMasterCourse newCourse = new McMasterCourse(departmentName, courseCode);
+                        
+                        // Update the department -> courses map
+                        if (!DepartmentToCoursesMap.ContainsKey(departmentName))
+                        {
+                            DepartmentToCoursesMap.Add(departmentName, new HashSet<McMasterCourse>(){ newCourse });
+                        }
+                        else
+                        {
+                            DepartmentToCoursesMap[departmentName].Add(newCourse);
+                        }
+
+                        // Update the course -> course name map
+                        // Note: we are assuming that the first name associated with a course is correct (i.e. that there is no conflict)
+                        if (!CourseToNameMap.ContainsKey(newCourse))
+                        {
+                            CourseToNameMap.Add(newCourse, courseName);
+                        }
+
+                        //IList<String> elementList = course.FindElements("<td", new List<string>() { "</td>" });
+                        //foreach (String element in elementList)
+                        //{
+                        //    string[] elementContentList = element.Split(new string[] { ">" }, StringSplitOptions.RemoveEmptyEntries);
+                        //    if (elementContentList.Length > 1) {
+                        //        elementContentList[1].ToString();
+                        //    }
+                        //    element.ToString();
+                            //Regex regex = new Regex(@".[>]")
+                            //Regex regex = new Regex(@"\s\d[A-Z]\w\d$", RegexOptions.IgnoreCase);
+                        //}
+                    }
+                }
+
+            }
+
+            int x = DepartmentToCoursesMap.Count;
+            int y = CourseToNameMap.Count;
         }
 
         //private async void RetrieveCourseData()
@@ -56,8 +139,9 @@ namespace MarkMaster
         //    {
         //        CourseJSONData = await hyperTextResponse.Content.ReadAsStringAsync();
 
-        //        // Then parse the JSON response
-        //        var resultItem = JsonConvert.DeserializeObject(CourseJSONData);
+        //        // Then parse the JSON response dynamically (i.e. without declaring classes)
+        //        dynamic resultItem = JsonConvert.DeserializeObject(CourseJSONData);
+        //        Debug.WriteLine("First course: {0}", resultItem.courses[0].ToString());
         //    }
         //    else
         //    {
@@ -65,7 +149,7 @@ namespace MarkMaster
         //    }
 
         //    return;
-            
+
         //}
 
 
@@ -140,7 +224,7 @@ namespace MarkMaster
 
             // Perform initial course data retrieval / parsing
             // TODO fix and finish implementing this
-            //RetrieveCourseData();
+            RetrieveCourseData();
         }
 
         /// <summary>

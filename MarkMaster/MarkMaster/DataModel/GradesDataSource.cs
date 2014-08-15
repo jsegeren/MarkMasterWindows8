@@ -25,6 +25,38 @@ using Windows.UI.Xaml.Media.Imaging;
 
 namespace MarkMaster.Data
 {
+    // Key type for map of courses to course names
+    public class McMasterCourse
+    {
+        public McMasterCourse(string departmentName, string courseCode)
+        {
+            this.DepartmentName = departmentName;
+            this.CourseCode = courseCode;
+        }
+
+        public string DepartmentName { get; private set; }
+        public string CourseCode { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof(McMasterCourse)) return false;
+            return Equals((McMasterCourse)obj);
+        }
+
+        public bool Equals(McMasterCourse other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return (other.DepartmentName == DepartmentName && other.CourseCode == CourseCode);
+        }
+        public override int GetHashCode()
+        {
+            return (DepartmentName.GetHashCode() ^ CourseCode.GetHashCode());
+        }
+    }
+
     /// <summary>
     /// Course item data model -> describes properties of individual item
     /// One or more items can be included in a course (i.e. course is a collection of course items)
