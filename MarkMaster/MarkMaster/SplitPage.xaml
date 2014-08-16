@@ -284,7 +284,8 @@
                 </StackPanel>
 
                 <StackPanel x:Name="itemRequiredGradePanel" Margin="20" Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" VerticalAlignment="Center"
-                            Visibility="{Binding HasItemGrade, Converter={StaticResource FalseToVisibilityConverter}}">
+                            Visibility="{Binding HasItemGrade, Converter={StaticResource FalseToVisibilityConverter}}"
+                            ToolTipService.ToolTip="Needed to achieve course goal, based on achieved grades/weights, and weights of remaining items">
                     <TextBlock x:Name="itemRequiredGradeLabel" Margin="0,10,0,5" Text="Min Required Grade" Style="{StaticResource SubtitleTextBlockStyle}"/>
                     <TextBlock x:Name="itemRequiredGrade" Margin="0,10,0,0" Foreground="{Binding ItemRequiredGrade, Converter={StaticResource ValueToColorConverter}, ConverterParameter=100}"
                                FontSize="35" Text="{Binding ItemRequiredGrade, Converter={StaticResource StringConverter}, ConverterParameter=\{0:0.0\}}" Style="{StaticResource SubheaderTextBlockStyle}" IsHitTestVisible="True" />
