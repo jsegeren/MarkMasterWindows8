@@ -110,6 +110,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\BooleanConverter.cs" />
+    <Compile Include="Common\DepartmentNameToAbbrevConverter.cs" />
     <Compile Include="Common\ParsingExtensionMethods.cs" />
     <Compile Include="Common\StringFormatter.cs" />
     <Compile Include="Common\GradeScaleConverter.cs" />

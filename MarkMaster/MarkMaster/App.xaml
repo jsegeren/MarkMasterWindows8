@@ -11,7 +11,8 @@
         <x:String x:Key="AppName">MarkMaster</x:String>
         <x:String x:Key="SnappedError">Sorry, this app is currently unusable in snapped mode</x:String>
         
-        <x:String x:Key="DefaultCourseCode">SAMPLE 1A03</x:String>
+        <x:String x:Key="DefaultDepartmentName">SAMPLE</x:String>
+        <x:String x:Key="DefaultCourseCode">1A03</x:String>
         <x:String x:Key="DefaultCourseName">New Course</x:String>
         <x:String x:Key="DefaultCourseImagePath">Assets/MarkMasterSplash.scale-100.png</x:String>
         <x:String x:Key="DefaultCourseUnits">3</x:String>
@@ -27,9 +28,10 @@
         <x:String x:Key="JsonUriString">ms-appx:///DataModel/GradesData.json</x:String>
         <x:String x:Key="JsonDisplayName">GradesData.json</x:String>
         
-        <common:StringFormatter x:Key="StringConverter"/>
+        <common:StringFormatter x:Key="StringConverter" />
         <common:BooleanToVisibilityConverter x:Key="TrueToVisibilityConverter" />
-        <common:BooleanToVisibilityConverter x:Key="FalseToVisibilityConverter" IsReversed="True"/>
-        <common:GradeScaleConverter x:Key="GradeScaleConverter"/>
+        <common:BooleanToVisibilityConverter x:Key="FalseToVisibilityConverter" IsReversed="True" />
+        <common:DepartmentNameToAbbrevConverter x:Key="DepartmentNameToAbbrevConverter" />
+        <common:GradeScaleConverter x:Key="GradeScaleConverter" />
     </Application.Resources>
 </Application>

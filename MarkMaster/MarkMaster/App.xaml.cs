@@ -82,13 +82,13 @@ namespace MarkMaster
                     new List<String>() { "</table></td></tr><tr><td class=label colspan=10>" });
                 foreach (String departmentData in departmentDataList)
                 {
-                    String departmentName = departmentData.Split(new string[] { "</td>" }, StringSplitOptions.RemoveEmptyEntries)[0];
+                    String departmentName = departmentData.Split(new string[] { "</td>" }, StringSplitOptions.RemoveEmptyEntries)[0].Trim();
                     IList<String> courseDataList = departmentData.FindElements("<td", new List<String>() { "</table></td></tr><tr>" });
                     foreach (String courseData in courseDataList)
                     {
                         string[] courseMetaList = courseData.Split(new string[] { "&nbsp;" }, StringSplitOptions.RemoveEmptyEntries);
-                        String courseCode = courseMetaList[1];
-                        String courseName = courseMetaList[3];
+                        String courseCode = courseMetaList[1].Trim();
+                        String courseName = courseMetaList[3].Trim();
                         McMasterCourse newCourse = new McMasterCourse(departmentName, courseCode);
                         
                         // Update the department -> courses map

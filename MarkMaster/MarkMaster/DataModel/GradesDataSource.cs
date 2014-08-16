@@ -26,16 +26,59 @@ using Windows.UI.Xaml.Media.Imaging;
 namespace MarkMaster.Data
 {
     // Key type for map of courses to course names
-    public class McMasterCourse
+    public class McMasterCourse : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
         public McMasterCourse(string departmentName, string courseCode)
         {
             this.DepartmentName = departmentName;
             this.CourseCode = courseCode;
         }
 
-        public string DepartmentName { get; private set; }
-        public string CourseCode { get; private set; }
+        private string _departmentName;
+        private string _courseCode;
+
+        public string DepartmentName
+        {
+            get
+            {
+                return _departmentName;
+            }
+            set
+            {
+                if (SetProperty<string>(ref _departmentName, value)) { }
+            }
+        }
+
+        public string CourseCode
+        {
+            get
+            {
+                return _courseCode;
+            }
+            set
+            {
+                if (SetProperty<string>(ref _courseCode, value)) { }
+            }
+        }
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (object.Equals(storage, value)) return false;
+            storage = value; OnPropertyChanged(propertyName); return true;
+        }
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public override string ToString()
+        {
+            return DepartmentName + " " + CourseCode;
+        }
 
         public override bool Equals(object obj)
         {
@@ -157,13 +200,13 @@ namespace MarkMaster.Data
     public class GradesDataGroup : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-
-        public GradesDataGroup(String uniqueId, String courseName, String courseCode, String imagePath,
+        
+        public GradesDataGroup(String uniqueId, String courseName, McMasterCourse macCourse, String imagePath,
             UInt16 courseUnits, Double courseGoal, Double courseGrade)
         {
             this.UniqueId = uniqueId;
             this.CourseName = courseName;
-            this.CourseCode = courseCode;
+            this.MacCourse = macCourse;
             this.ImagePath = imagePath;
             this.CourseUnits = courseUnits;
             this.CourseGoal = courseGoal;
@@ -173,11 +216,12 @@ namespace MarkMaster.Data
             // Add event to recalculate course grade if any item changes
             this.Items.CollectionChanged += OnItemsCollectionChanged;
         }
+
         private string _courseName;
-        private string _courseCode;
         private double _courseGrade;
         private double _courseGoal;
         private UInt16 _courseUnits;
+        private McMasterCourse _macCourse;
 
         public string UniqueId { get; private set; }
         public string CourseName
@@ -189,18 +233,6 @@ namespace MarkMaster.Data
             set
             {
                 if (SetProperty<string>(ref _courseName, value)) { }
-            }
-        }
-        public string CourseCode
-        {
-            get
-            {
-                return _courseCode;
-            }
-
-            set
-            {
-                if (SetProperty<string>(ref _courseCode, value)) { }
             }
         }
         public string ImagePath { get; private set; }
@@ -242,11 +274,27 @@ namespace MarkMaster.Data
                 }
             }
         }
+
+        public McMasterCourse MacCourse
+        {
+            get
+            {
+                return _macCourse;
+            }
+            set
+            {
+                if (SetProperty<McMasterCourse>(ref _macCourse, value))
+                {
+                    GradesDataSource.RecalculateSessionalGrade();
+                }
+            }
+        }
+
         public ObservableCollection<GradesDataItem> Items { get; private set; }
 
         public override string ToString()
         {
-            return this.CourseCode;
+            return this.MacCourse.CourseCode;
         }
 
         protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
@@ -545,14 +593,19 @@ namespace MarkMaster.Data
         public static string CreateNewCourse()
         {
             int courseUniqueID = _gradesDataSource._autoUniqueID++;
+            McMasterCourse newMacCourse = new McMasterCourse(
+                (string) Application.Current.Resources["DefaultDepartmentName"],
+                (string) Application.Current.Resources["DefaultCourseCode"]);
+
+
             GradesDataGroup group = new GradesDataGroup(
                 (courseUniqueID).ToString(),
-                (string) Application.Current.Resources["DefaultCourseName"],
-                (string) Application.Current.Resources["DefaultCourseCode"],
+                (string)Application.Current.Resources["DefaultCourseName"],
+                newMacCourse,
                 (string)Application.Current.Resources["DefaultCourseImagePath"],
-                UInt16.Parse((string) Application.Current.Resources["DefaultCourseUnits"]),
-                (double) Application.Current.Resources["DefaultCourseGoal"],
-                (double) Application.Current.Resources["DefaultCourseGrade"]
+                UInt16.Parse((string)Application.Current.Resources["DefaultCourseUnits"]),
+                (double)Application.Current.Resources["DefaultCourseGoal"],
+                (double)Application.Current.Resources["DefaultCourseGrade"]
                 );
 
             // Insert placeholder course item

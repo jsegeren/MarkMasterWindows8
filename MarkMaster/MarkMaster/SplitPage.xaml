@@ -68,7 +68,7 @@
                      GotFocus="pageTitleEdit_GotFocus" LostFocus="pageTitleEdit_LostFocus"
                      PlaceholderText="Enter a course name" KeyDown="AlphaEditBox_KeyDown"/>
         </Grid>
-        
+
         <Grid x:Name="courseDetailGrid" Grid.Row="1" Grid.Column="0"
               DataContext="{Binding Group}"
               d:DataContext="{Binding Groups[0], Source={d:DesignData Source=/DataModel/GradesData.json, Type=data:GradesDataSource}}">
@@ -79,18 +79,26 @@
 
             <StackPanel x:Name="courseDetailPanel" Margin="30,10,20,20" VerticalAlignment="Top">
                 <TextBlock x:Name="courseCodeLabel" Margin="0,10,0,5" Text="Course Code" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <TextBlock x:Name="courseCode" Margin="0,0,0,10" Text="{Binding CourseCode, Mode=TwoWay}" 
-                           Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center" FontSize="35"
-                           Tapped="courseCode_Tapped"/>
-                <StackPanel x:Name="courseCodeEditPanel" Margin="0,10,0,10" Orientation="Horizontal" Width="365" Height="40" Visibility="Collapsed">
-                    <ComboBox x:Name="courseCodeEdit" Margin="0,0,10,0" Width="250" Height="40" Visibility="Visible" 
-                              SelectionChanged="courseCodeEdit_SelectionChanged" KeyUp="courseCodeEdit_KeyUp" GotFocus="courseCodeEdit_GotFocus"
-                              Background="{x:Null}" Foreground="White" FontSize="25"/>
+                <StackPanel x:Name="courseCodePanel" Margin="0,10,0,10" Orientation="Horizontal" Width="365" Height="40" Tapped="courseCode_Tapped"
+                            DataContext="{Binding MacCourse}">
+                    <TextBlock x:Name="departmentName" Margin="0,0,20,0" Text="{Binding DepartmentName, Converter={StaticResource DepartmentNameToAbbrevConverter}}"
+                               Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center" FontSize="35" />
+                    <TextBlock x:Name="courseCode" Text="{Binding CourseCode}"
+                               Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center" FontSize="35" />
+                </StackPanel>
+                <StackPanel x:Name="courseCodeEditPanel" Margin="0,10,0,10" Orientation="Horizontal" Width="365" Height="40" Visibility="Collapsed"
+                            DataContext="{Binding MacCourse}">
+                    <ComboBox x:Name="departmentNameEdit" Margin="0,0,10,0" Width="240" Height="40" Visibility="Visible" 
+                              SelectionChanged="departmentNameEdit_SelectionChanged" Background="{x:Null}" Foreground="White" 
+                              FontSize="25" SelectedValue="{Binding DepartmentName, Mode=TwoWay}"/>
+                    <ComboBox x:Name="courseCodeEditCombo" Width="110" Height="40" Visibility="Visible" Background="{x:Null}" Foreground="White" 
+                              SelectionChanged="courseCodeEdit_SelectionChanged"
+                              DropDownClosed="courseCode_SelectionMade"
+                              FontSize="25" SelectedValue="{Binding CourseCode, Mode=TwoWay}"/>
                     <!--<ab:AutoCompleteBox x:Name="courseCodeEdit" Margin="0,0,10,0" Width="250" Height="40" Visibility="Visible" />-->
-                    <TextBox x:Name="courseCodeEdit2" Width="90" Height="40" Visibility="Visible" VerticalAlignment="Center" VerticalContentAlignment="Center"
-                             TextChanged="courseCodeEdit2_TextChanged" InputScope="AlphanumericHalfWidth" MaxLength="4"
-                             Background="{x:Null}" Foreground="White" FontSize="25" GotFocus="courseCodeEdit_GotFocus" KeyDown="courseCodeEdit2_KeyDown"
-                             LostFocus="courseCodeEdit_LostFocus"/>
+                    <TextBox x:Name="courseCodeEdit2" Width="90" Height="40" Visibility="Collapsed" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                             InputScope="AlphanumericHalfWidth" MaxLength="4" Background="{x:Null}" Foreground="White" FontSize="25" 
+                             Text="{Binding CourseCode, Mode=TwoWay}"/>
                 </StackPanel>
                 <TextBlock x:Name="courseUnitsLabel" Margin="0,10,0,5" Text="Course Units" Style="{StaticResource SubtitleTextBlockStyle}"/>
                 <Grid Margin="30,0,30,0">
@@ -162,8 +170,8 @@
                                Text="Four-Point Scale" Style="{StaticResource SubtitleTextBlockStyle}"/>
                 </StackPanel>
             </Grid>
-            
-            
+
+
             <!--<StackPanel Grid.Row="2" x:Name="buttonPanel" Orientation="Horizontal" Margin="30,10,10,10" VerticalAlignment="Stretch">
                 <Button x:Name="ButtonEditFields" Content="Edit Course Info" HorizontalAlignment="Center"
                         Click="OnEditFieldsClick" />
@@ -270,7 +278,7 @@
                              Background="{x:Null}" Foreground="White" FontSize="20"
                              GotFocus="OnTextBoxFocus" LostFocus="itemSubtitleEdit_LostFocus" KeyDown="AlphaEditBox_KeyDown"/>-->
                     <ComboBox x:Name="itemSubtitleEditCombo" SelectedValue="{Binding ItemType, Mode=TwoWay}" Margin="0,10,0,10" Width="250" Height="40" 
-                              Visibility="Collapsed" Background="{x:Null}" Foreground="White" FontSize="20" DropDownClosed="itemSubtitleEdit_SelectionMade" />
+                              Visibility="Collapsed" Background="{x:Null}" Foreground="White" FontSize="20" DropDownClosed="comboBox_SelectionMade" />
                 </StackPanel>
                 <StackPanel x:Name="itemWeightLabel" Grid.Row="1" Grid.Column="0" Margin="0,0,20,20" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Margin="0,0,0,0" Text="Weight" Style="{StaticResource SubtitleTextBlockStyle}"/>
@@ -307,11 +315,13 @@
                                Style="{StaticResource TitleTextBlockStyle}" Foreground="#FFB48417" IsTextSelectionEnabled="False"
                                Visibility="Visible"/>
                 </StackPanel>
-                
+
             </Grid>
         </ScrollViewer>
         <!--<VisualStateManager.VisualStateGroups>
-            --><!-- Visual states reflect the application's view state --><!--
+            -->
+        <!-- Visual states reflect the application's view state -->
+        <!--
             <VisualStateGroup x:Name="ViewStates">
                 <VisualState x:Name="PrimaryView" />
                 <VisualState x:Name="SinglePane">
@@ -330,13 +340,15 @@
                         </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
-                --><!--
+                -->
+        <!--
                     When an item is selected and only one pane is shown the details display requires more extensive changes:
                      * Hide the master list and the column it was in
                      * Move item details down a row to make room for the title
                      * Move the title directly above the details
                      * Adjust padding for details
-                 --><!--
+                 -->
+        <!--
                 <VisualState x:Name="SinglePane_Detail">
                     <Storyboard>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="firstColumn" Storyboard.TargetProperty="Width">
