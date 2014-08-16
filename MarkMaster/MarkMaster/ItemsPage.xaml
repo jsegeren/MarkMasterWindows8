@@ -113,7 +113,7 @@
                         </Border>
                         <StackPanel Grid.Row="2" VerticalAlignment="Bottom" Background="{ThemeResource ListViewItemOverlayBackgroundThemeBrush}">
                             <TextBlock Text="{Binding CourseName}" Foreground="{ThemeResource ListViewItemOverlayForegroundThemeBrush}" Style="{StaticResource BaseTextBlockStyle}" Height="30" Margin="15,5,15,0" FontWeight="SemiBold" FontSize="20" FontFamily="Global User Interface"/>
-                            <TextBlock Text="{Binding CourseCode}" Foreground="{ThemeResource ListViewItemOverlaySecondaryForegroundThemeBrush}" Style="{StaticResource BaseTextBlockStyle}" TextWrapping="NoWrap" Margin="15,0,15,10" FontSize="16"/>
+                            <TextBlock Text="{Binding MacCourse}" Foreground="{ThemeResource ListViewItemOverlaySecondaryForegroundThemeBrush}" Style="{StaticResource BaseTextBlockStyle}" TextWrapping="NoWrap" Margin="15,0,15,10" FontSize="16"/>
                         </StackPanel>
                         <StackPanel Grid.Row="3" Background="{ThemeResource ListViewItemOverlayBackgroundThemeBrush}">
                             <TextBlock Text="{Binding CourseGrade, 

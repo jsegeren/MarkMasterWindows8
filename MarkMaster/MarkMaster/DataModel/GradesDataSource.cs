@@ -77,7 +77,8 @@ namespace MarkMaster.Data
 
         public override string ToString()
         {
-            return DepartmentName + " " + CourseCode;
+            DepartmentNameToAbbrevConverter departmentNameToAbbrevConverter = new DepartmentNameToAbbrevConverter();
+            return departmentNameToAbbrevConverter.Convert(DepartmentName, null, null, null) + " " + CourseCode;
         }
 
         public override bool Equals(object obj)
@@ -108,7 +109,8 @@ namespace MarkMaster.Data
     {
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public GradesDataItem(String uniqueId, String itemName, String imagePath, String itemType, Double itemGrade, Double itemWeight)
+        public GradesDataItem(String uniqueId, String itemName, String imagePath, String itemType, Double itemGrade, Double itemWeight,
+            Boolean hasItemGrade, Double itemRequiredGrade)
         {
             this.UniqueId = uniqueId;
             this.ItemName = itemName;
@@ -116,6 +118,8 @@ namespace MarkMaster.Data
             this.ItemType = itemType;
             this.ItemGrade = itemGrade;
             this.ItemWeight = itemWeight;
+            this.HasItemGrade = hasItemGrade;
+            this.ItemRequiredGrade = itemRequiredGrade;
         }
 
         // Backing fields for course item properties
@@ -123,6 +127,8 @@ namespace MarkMaster.Data
         private string _itemType;
         private double _itemGrade;
         private double _itemWeight;
+        private bool _hasItemGrade;
+        private double _itemRequiredGrade;
 
         // Public properties
         public string UniqueId { get; private set; }
@@ -171,6 +177,28 @@ namespace MarkMaster.Data
             set
             { // Implement for two-way binding; re-evalulate only if value actually changed
                 if (SetProperty<double>(ref _itemWeight, value)) { }
+            }
+        }
+        public bool HasItemGrade
+        {
+            get
+            {
+                return _hasItemGrade;
+            }
+            set
+            {
+                if (SetProperty<bool>(ref _hasItemGrade, value)) { }
+            }
+        }
+        public double ItemRequiredGrade
+        {
+            get
+            {
+                return _itemRequiredGrade;
+            }
+            set
+            {
+                if (SetProperty<double>(ref _itemRequiredGrade, value)) { }
             }
         }
 
@@ -257,7 +285,10 @@ namespace MarkMaster.Data
             }
             set
             {
-                if (SetProperty<double>(ref _courseGoal, value)) { }
+                if (SetProperty<double>(ref _courseGoal, value))
+                {
+                    RecalculateRequiredItemGrades(this, new PropertyChangedEventArgs("CourseGoal"));
+                }
             }
         }
 
@@ -307,11 +338,16 @@ namespace MarkMaster.Data
         {
             if (args.NewItems != null)
             {
-                foreach (var newItem in args.NewItems) ((GradesDataItem)newItem).PropertyChanged += RecalculateCourseGrade;
+                foreach (var newItem in args.NewItems)
+                {
+                    ((GradesDataItem)newItem).PropertyChanged += RecalculateCourseGrade;
+                    ((GradesDataItem)newItem).PropertyChanged += RecalculateRequiredItemGrades;
+                }
             }
 
             PropertyChangedEventArgs newArgs = new PropertyChangedEventArgs("ItemGrade");
             RecalculateCourseGrade(sender, newArgs); // Recalculate in case items deleted
+            RecalculateRequiredItemGrades(sender, newArgs);
         }
 
         protected void OnPropertyChanged(string propertyName)
@@ -322,17 +358,45 @@ namespace MarkMaster.Data
             }
         }
 
+        // Subscribed function (event handler) which updates required (target) grades for each course item
+        // based on the collection of items which do not yet have actual grades, and the grade goal for the course
+        void RecalculateRequiredItemGrades(object sender, PropertyChangedEventArgs args)
+        {
+            if ((args.PropertyName == "ItemWeight" || args.PropertyName == "ItemGrade" 
+                || args.PropertyName == "HasItemGrade" || args.PropertyName == "CourseGoal") && Items != null)
+            {
+                // Only consider course items with non-zero positive weight, and which do not have actual grades
+                var itemsConsidered = Items.Where(item => (item.ItemWeight != 0 && !item.HasItemGrade));
+                var itemsRemaining = Items.Except(itemsConsidered);
+
+                // Done if result set is empty; also avoids zero division (NaN) result
+                if (itemsConsidered.Count() > 0)
+                {
+                    Double requiredGrade = (CourseGoal * Items.Select(item => item.ItemWeight).Sum() -
+                        itemsRemaining.Select(item => item.ItemWeight * item.ItemGrade).Sum()) /
+                        (itemsConsidered.Select(item => item.ItemWeight).Sum());
+                    requiredGrade = Math.Max(requiredGrade, 0); // Negative values not useful
+
+                    foreach (var item in itemsConsidered)
+                    {
+                        item.ItemRequiredGrade = requiredGrade;
+                    }
+                }
+            }
+        }
+
         // Subscribed function (event handler) which updates the course grade upon change in item weight or grade
         // Also calls function to update sessional average
         void RecalculateCourseGrade(object sender, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName == "ItemWeight" || args.PropertyName == "ItemGrade")
+            if (args.PropertyName == "ItemWeight" || args.PropertyName == "ItemGrade" || 
+                args.PropertyName == "HasItemGrade")
             {
                 //double oldCourseGrade = this.CourseGrade; // Store previous course grade for reference
                 // Retrieve course grade via dot product of weights * grades (all items), divided by total of weights
 
-                // Only consider course items with non-zero (positive) weight
-                var itemsNonZeroWeight = Items.Where(item => item.ItemWeight != 0);
+                // Only consider course items with non-zero (positive) weight, and with grade (i.e. not placeholders)
+                var itemsNonZeroWeight = Items.Where(item => (item.ItemWeight != 0 && item.HasItemGrade));
 
                 // If filtered result set is empty, avoid zero division error (NaN result!)
                 if (itemsNonZeroWeight.Count() == 0)
@@ -557,7 +621,9 @@ namespace MarkMaster.Data
                 (string) Application.Current.Resources["DefaultItemType"],
                 (double) Application.Current.Resources["DefaultItemGrade"],
                 //(double) Application.Current.Resources["DefaultItemWeight"]
-                defaultItemWeight
+                defaultItemWeight,
+                (bool) Application.Current.Resources["DefaultHasItemGrade"],
+                (double) Application.Current.Resources["DefaultItemRequiredGrade"]
                 );
 
             ((GradesDataGroup) _gradesDataSource.Groups.Where(course => course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Add(newItem);

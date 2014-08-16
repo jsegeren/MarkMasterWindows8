@@ -114,6 +114,7 @@
     <Compile Include="Common\ParsingExtensionMethods.cs" />
     <Compile Include="Common\StringFormatter.cs" />
     <Compile Include="Common\GradeScaleConverter.cs" />
+    <Compile Include="Common\ValueToColorConverter.cs" />
     <Compile Include="ItemsPage.xaml.cs">
       <DependentUpon>ItemsPage.xaml</DependentUpon>
     </Compile>
@@ -136,6 +137,7 @@
     <Content Include="Assets\MarkMasterSmallLogo.scale-100.png" />
     <Content Include="Assets\MarkMasterSplash.scale-100.png" />
     <Content Include="Assets\MarkMasterStoreLogo.png" />
+    <Content Include="Assets\McMasterRegistrarData_August_2014.txt" />
     <Content Include="Assets\Subjects_McMaster_Jan_2014.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

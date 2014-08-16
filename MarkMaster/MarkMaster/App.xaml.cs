@@ -14,6 +14,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -62,21 +63,50 @@ namespace MarkMaster
         }
 
         /**
-         * Method to manually retrieve course data from the McMaster registar website directly
+         * Method to manually retrieve course data from the McMaster registar website directly.
+         * Falls back to use information from bundled asset (cached course info) if no internet
+         * connection available.
          **/
         private async void RetrieveCourseData()
         {
-            HttpClient httpClient = new HttpClient();
-            Uri sourceDataUrl = new Uri("https://adweb.cis.mcmaster.ca/mtt/U201409.html");
-            HttpResponseMessage httpResponse = await httpClient.GetAsync(sourceDataUrl);
             DepartmentToCoursesMap = new Dictionary<string, HashSet<McMasterCourse>>();
             CourseToNameMap = new Dictionary<McMasterCourse, string>();
+            String responseString = null;
 
-            if (httpResponse.StatusCode == HttpStatusCode.Ok)
+            try
             {
-                string responseString = await httpResponse.Content.ReadAsStringAsync();
-                responseString.ToString();
+                HttpClient httpClient = new HttpClient();
+                Uri sourceDataUrl = new Uri((string)Application.Current.Resources["McMasterRegistarDataUrl"]);
+                HttpResponseMessage httpResponse = await httpClient.GetAsync(sourceDataUrl);
 
+                if (httpResponse.StatusCode == HttpStatusCode.Ok)
+                {
+                    responseString = await httpResponse.Content.ReadAsStringAsync();
+                }
+            }
+                // Fails for example, if no internet connection available
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+
+            // Retrieve the stored course data (fallback)
+            if (responseString == null)
+            {
+                try
+                {
+                    var registrarDataFile =
+                        await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync((string)Application.Current.Resources["McMasterRegistarDataAssetPath"]);
+                    responseString = await FileIO.ReadTextAsync(registrarDataFile);
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e);
+                }
+            }
+
+            if (responseString != null)
+            {
                 // Now parse the raw HTML
                 IList<String> departmentDataList = responseString.FindElements("<p>&nbsp;</p>", 
                     new List<String>() { "</table></td></tr><tr><td class=label colspan=10>" });

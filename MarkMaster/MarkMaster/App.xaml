@@ -6,6 +6,9 @@
     xmlns:localData="using:MarkMaster.Data"
     xmlns:common="using:MarkMaster.Common">
     <Application.Resources>
+        <!-- URIs -->
+        <x:String x:Key="McMasterRegistarDataUrl">https://adweb.cis.mcmaster.ca/mtt/U201409.html</x:String>
+        <x:String x:Key="McMasterRegistarDataAssetPath">Assets\McMasterRegistrarData_August_2014.txt</x:String>
 
         <!-- Application-specific resources -->
         <x:String x:Key="AppName">MarkMaster</x:String>
@@ -24,6 +27,8 @@
         <x:String x:Key="DefaultItemImagePath">Assets/MarkMasterLogo.scale-100.png</x:String>
         <x:Double x:Key="DefaultItemWeight">0</x:Double>
         <x:Double x:Key="DefaultItemGrade">0</x:Double>
+        <x:Boolean x:Key="DefaultHasItemGrade">false</x:Boolean>
+        <x:Double x:Key="DefaultItemRequiredGrade">0</x:Double>
 
         <x:String x:Key="JsonUriString">ms-appx:///DataModel/GradesData.json</x:String>
         <x:String x:Key="JsonDisplayName">GradesData.json</x:String>
@@ -32,6 +37,7 @@
         <common:BooleanToVisibilityConverter x:Key="TrueToVisibilityConverter" />
         <common:BooleanToVisibilityConverter x:Key="FalseToVisibilityConverter" IsReversed="True" />
         <common:DepartmentNameToAbbrevConverter x:Key="DepartmentNameToAbbrevConverter" />
+        <common:ValueToColorConverter x:Key="ValueToColorConverter" />
         <common:GradeScaleConverter x:Key="GradeScaleConverter" />
     </Application.Resources>
 </Application>

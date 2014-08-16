@@ -122,7 +122,7 @@ namespace MarkMaster
             this.DefaultViewModel["IsEditingFlag"] = gradesDataSource.IsEditingFlag;
 
             // Hide edit fields button for now (force individual editing of fields)
-            editFieldsButton.Visibility = Visibility.Collapsed;
+            //editFieldsButton.Visibility = Visibility.Collapsed;
 
             // Populate the course code combobox with cached list of subjects
             var courseSubjectFile = await
@@ -140,7 +140,7 @@ namespace MarkMaster
             }
             else
             {
-                departmentNameEdit.ItemsSource = courseSubjectFile;
+                departmentNameEdit.ItemsSource = courseSubjectList;
                 courseCodeEditCombo.Visibility = Visibility.Collapsed;
                 courseCodeEdit2.Visibility = Visibility.Visible;
             }
@@ -495,7 +495,7 @@ namespace MarkMaster
                 listView.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                 Size listViewSize = listView.DesiredSize;
                 item = (int)(verticalCoordinate / listViewSize.Height * listView.Items.Count);
-                item = item > listView.Items.Count ? listView.Items.Count - 1 : item;
+                item = item >= listView.Items.Count ? listView.Items.Count - 1 : item;
             }
 
             var tappedItem = listView.Items[item];
@@ -713,6 +713,7 @@ namespace MarkMaster
         private void itemGradeValueEdit_LostFocus(object sender, RoutedEventArgs e)
         {
             TextBoxLostFocus(itemGradeValue, itemGradeValueEdit);
+            itemGradeCheckbox.Visibility = Visibility.Visible;
             if (String.IsNullOrWhiteSpace(itemGradeValueEdit.Text))
             {
                 itemGradeValueEdit.Text = previousTextBoxString;
@@ -721,6 +722,7 @@ namespace MarkMaster
 
         private void itemGradeValue_Tapped(object sender, TappedRoutedEventArgs e)
         {
+            itemGradeCheckbox.Visibility = Visibility.Collapsed;
             TextBlockTapped(itemGradeValue, itemGradeValueEdit);
         }
 
@@ -765,6 +767,12 @@ namespace MarkMaster
             {
                 courseGrade.Foreground = new SolidColorBrush(Color.FromArgb(255, 95, 55, 190));
             }
+        }
+
+        private void itemGradeCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            // Ensure edit box becomes invisible
+            itemGradeValueEdit.Visibility = Visibility.Collapsed;
         }
 
     }
