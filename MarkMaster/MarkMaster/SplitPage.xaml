@@ -10,6 +10,10 @@
     xmlns:ab="using:AutoCompleteBox"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:Media="using:Microsoft.Xaml.Interactions.Media"
+    xmlns:Core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:Behaviors="using:BehaviorsDemo.Behaviors"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -19,6 +23,15 @@
             Source="{Binding Items}"
             d:Source="{Binding Groups[0].Items, Source={d:DesignData Source=/DataModel/GradesData.json, Type=data:GradesDataSource}}"/>
         <!--<common:StringFormatter x:Key="StringConverter" />-->
+
+        <Storyboard x:Name="Crossfade">
+            <DoubleAnimation Duration="0:0:0.2" From="1" To="0" Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="courseGrade" d:IsOptimized="True" AutoReverse="True"/>
+            <DoubleAnimation Duration="0:0:0.2" From="1" To="0" Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="courseGradePercentSign" d:IsOptimized="True" AutoReverse="True"/>
+            <DoubleAnimation Duration="0:0:0.5" From="1.075" To="1.0" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" Storyboard.TargetName="courseGradeTwelve" d:IsOptimized="True"/>
+            <DoubleAnimation Duration="0:0:0.5" From="1.075" To="1.0" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" Storyboard.TargetName="courseGradeTwelve" d:IsOptimized="True"/>
+            <DoubleAnimation Duration="0:0:0.5" From="1.075" To="1.0" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" Storyboard.TargetName="courseGradeFour" d:IsOptimized="True"/>
+            <DoubleAnimation Duration="0:0:0.5" From="1.075" To="1.0" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" Storyboard.TargetName="courseGradeFour" d:IsOptimized="True"/>
+        </Storyboard>
     </Page.Resources>
 
     <!--
@@ -147,10 +160,22 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel x:Name="courseGradePanel" Grid.Row="0" Grid.ColumnSpan="2" Margin="30,50,0,10" Orientation="Horizontal" 
                             HorizontalAlignment="Left">
+                    <!--<TextBox x:Name="courseGradeFake" Text="{Binding CourseGrade, 
+                                Converter={StaticResource StringConverter}, 
+                                ConverterParameter=\{0:0.00\}, UpdateSourceTrigger=PropertyChanged}"
+                             Opacity="0" Height="0" Width="0" >
+                        <Interactivity:Interaction.Behaviors>
+                            <Core:EventTriggerBehavior EventName="TextChanged">
+                                <Media:ControlStoryboardAction Storyboard="{StaticResource Crossfade}"/>
+                            </Core:EventTriggerBehavior>
+                        </Interactivity:Interaction.Behaviors>
+                    </TextBox>-->
+                             
                     <TextBlock x:Name="courseGrade" Text="{Binding CourseGrade, 
                                 Converter={StaticResource StringConverter}, 
-                                ConverterParameter=\{0:0.00\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="100" FontWeight="Light"/>
-                    <TextBlock Grid.Column="1" Text="%" Margin="30,0,20,0"
+                                ConverterParameter=\{0:0.00\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="100" FontWeight="Light">
+                    </TextBlock>
+                    <TextBlock x:Name="courseGradePercentSign" Grid.Column="1" Text="%" Margin="30,0,20,0"
                                Style="{StaticResource SubheaderTextBlockStyle}" FontSize="75" FontWeight="Light"
                                VerticalAlignment="Center" Foreground="{Binding ElementName=courseGrade, Path=Foreground}"/>
                 </StackPanel>
@@ -158,14 +183,22 @@
                     <TextBlock x:Name="courseGradeTwelve" 
                            Text="{Binding CourseGrade, Converter={StaticResource GradeScaleConverter}, ConverterParameter=Twelve}"
                            Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="75" FontWeight="Normal"
-                           VerticalAlignment="Top"/>
+                           VerticalAlignment="Top">
+                        <TextBlock.RenderTransform>
+                            <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
                     <TextBlock x:Name="courseGradeTwelveLabel" Margin="0,10,0,5" Text="Twelve-Point Scale" Style="{StaticResource SubtitleTextBlockStyle}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,60,10,10">
                     <TextBlock x:Name="courseGradeFour"
                            Text="{Binding CourseGrade, Converter={StaticResource GradeScaleConverter}, ConverterParameter=Four}"
                            Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Left" FontSize="75" FontWeight="Normal"
-                           VerticalAlignment="Top"/>
+                           VerticalAlignment="Top">
+                        <TextBlock.RenderTransform>
+                            <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
                     <TextBlock x:Name="courseGradeFourLabel" Margin="0,10,0,5" HorizontalAlignment="Left"
                                Text="Four-Point Scale" Style="{StaticResource SubtitleTextBlockStyle}"/>
                 </StackPanel>
@@ -319,7 +352,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,20,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Center">
                         <TextBlock Margin="0,0,0,0" Text="N/A" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="30" Foreground="#FFB48417"
                                    Visibility="{Binding HasItemGrade, Mode=OneWay, Converter={StaticResource FalseToVisibilityConverter}}"/>
                         <StackPanel Visibility="{Binding HasItemGrade, Mode=OneWay, Converter={StaticResource TrueToVisibilityConverter}}">
@@ -332,7 +365,7 @@
                         </StackPanel>
                     </StackPanel>
                         <CheckBox Margin="0,25,60,0"  Grid.Column="1" x:Name="itemGradeCheckbox" VerticalAlignment="Center" HorizontalAlignment="Right" IsChecked="{Binding HasItemGrade, Mode=TwoWay}"
-                                  Unchecked="itemGradeCheckbox_Unchecked"/>
+                                  Unchecked="itemGradeCheckbox_Unchecked" Checked="itemGradeCheckbox_Checked"/>
                 </Grid>
                 <Slider Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="3"
                             Margin="30,0,50,0" VerticalAlignment="Center" IsEnabled="{Binding HasItemGrade}"

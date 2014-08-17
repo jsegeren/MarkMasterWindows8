@@ -748,12 +748,14 @@ namespace MarkMaster
                 itemWeightWarning.Visibility = Visibility.Collapsed;
             }
             ResetCourseGradeColor();
+            Crossfade.Begin();
         }
 
         // TODO - Use data binding instead? Set color of course grade based on comparison with course goal
         private void CourseGoal_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             ResetCourseGradeColor();
+            Crossfade.Begin();
         }
 
         private void ResetCourseGradeColor()
@@ -773,6 +775,12 @@ namespace MarkMaster
         {
             // Ensure edit box becomes invisible
             itemGradeValueEdit.Visibility = Visibility.Collapsed;
+            Crossfade.Begin();
+        }
+
+        private void itemGradeCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            Crossfade.Begin();
         }
 
     }
