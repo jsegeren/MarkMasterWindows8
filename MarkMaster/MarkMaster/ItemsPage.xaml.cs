@@ -85,16 +85,11 @@ namespace MarkMaster
         /// session.  The state will be null the first time a page is visited.</param>
         private async void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            //ObservableCollection<GradesDataGroup> sampleDataGroups = 
-                //(ObservableCollection<GradesDataGroup>) await GradesDataSource.GetGroupsAsync();
             gradesDataSource = (GradesDataSource) await GradesDataSource.GetDataSourceAsync();
 
             // Add final element representing new/add course button
-            //this.DefaultViewModel["Courses"] = sampleDataGroups;
             this.DefaultViewModel["Courses"] = (ObservableCollection<GradesDataGroup>) gradesDataSource.Groups;
             this.DefaultViewModel["Grades"] = gradesDataSource;
-            //this.DefaultViewModel["SessionalUnits"] = gradesDataSource.SessionalUnits;
-
             itemGridView.SelectedIndex = -1; // No item selected upon load
         }
 
@@ -164,13 +159,11 @@ namespace MarkMaster
                 {
                     removeCourseButton.IsEnabled = true;
                     BottomAppBar.IsOpen = true;
-                    //removeCourseButton.Visibility = Visibility.Visible;
                 }
                 else
                 {
                     removeCourseButton.IsEnabled = false;
                     BottomAppBar.IsOpen = false;
-                    //removeCourseButton.Visibility = Visibility.Collapsed;
                 }
             }
 

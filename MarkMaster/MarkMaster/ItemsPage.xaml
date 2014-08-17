@@ -131,30 +131,9 @@
                 <!--<ColumnDefinition Width="120"/>-->
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <!--<Button x:Name="backButton" Margin="39,59,39,0" Command="{Binding NavigationHelper.GoBackCommand, ElementName=pageRoot}"
-                        Style="{StaticResource NavigationBackButtonNormalStyle}"
-                        VerticalAlignment="Top"
-                        AutomationProperties.Name="Back"
-                        AutomationProperties.AutomationId="BackButton"
-                        AutomationProperties.ItemType="Navigation Button"/>-->
             <TextBlock x:Name="pageTitle" Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
                         IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="50,0,30,40"/>
         </Grid>
-
-        <!--<ContentControl x:Name="PopupContainer" Height="650" Margin="0,250,0,140">
-            <Popup x:Name="AddCoursePopup" IsLightDismissEnabled="False">
-                <Popup.ChildTransitions>
-                    <TransitionCollection>
-                        <PopupThemeTransition />
-                    </TransitionCollection>
-                </Popup.ChildTransitions>
-                <StackPanel x:Name="PopupStackPanel" Orientation="Vertical" Background="{StaticResource ListViewItemOverlayBackgroundThemeBrush}"
-                            HorizontalAlignment="Center" VerticalAlignment="Stretch">
-                    <TextBlock Text="Simple Popup" FontSize="24.667" HorizontalAlignment="Center" />
-                    <Button Content="Close" Click="OnClosePopupClick" HorizontalAlignment="Center" />
-                </StackPanel>
-            </Popup>
-        </ContentControl>-->
     </Grid>
 
     <Page.BottomAppBar>

@@ -19,6 +19,10 @@ namespace MarkMaster.Common
             string formatString = parameter as string;
             if (!string.IsNullOrEmpty(formatString))
             {
+                if (value is double && (double)value < 0.0)
+                {
+                    return "?";
+                }
                 return string.Format(
                     new CultureInfo(language), formatString, value);
             }

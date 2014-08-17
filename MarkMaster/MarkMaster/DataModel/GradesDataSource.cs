@@ -228,7 +228,7 @@ namespace MarkMaster.Data
     public class GradesDataGroup : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        
+
         public GradesDataGroup(String uniqueId, String courseName, McMasterCourse macCourse, String imagePath,
             UInt16 courseUnits, Double courseGoal, Double courseGrade)
         {
@@ -272,7 +272,8 @@ namespace MarkMaster.Data
             }
             set
             {
-                if (SetProperty<UInt16>(ref _courseUnits, value)) {
+                if (SetProperty<UInt16>(ref _courseUnits, value))
+                {
                     GradesDataSource.RecalculateSessionalGrade();
                 }
             }
@@ -300,7 +301,8 @@ namespace MarkMaster.Data
             }
             set
             { // Implement for two-way binding; re-evalulate only if value actually changed
-                if (SetProperty<double>(ref _courseGrade, value)) {
+                if (SetProperty<double>(ref _courseGrade, value))
+                {
                     GradesDataSource.RecalculateSessionalGrade(); // Update sessional average
                 }
             }
@@ -362,7 +364,7 @@ namespace MarkMaster.Data
         // based on the collection of items which do not yet have actual grades, and the grade goal for the course
         void RecalculateRequiredItemGrades(object sender, PropertyChangedEventArgs args)
         {
-            if ((args.PropertyName == "ItemWeight" || args.PropertyName == "ItemGrade" 
+            if ((args.PropertyName == "ItemWeight" || args.PropertyName == "ItemGrade"
                 || args.PropertyName == "HasItemGrade" || args.PropertyName == "CourseGoal") && Items != null)
             {
                 // Only consider course items with non-zero positive weight, and which do not have actual grades
@@ -389,7 +391,7 @@ namespace MarkMaster.Data
         // Also calls function to update sessional average
         void RecalculateCourseGrade(object sender, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName == "ItemWeight" || args.PropertyName == "ItemGrade" || 
+            if (args.PropertyName == "ItemWeight" || args.PropertyName == "ItemGrade" ||
                 args.PropertyName == "HasItemGrade")
             {
                 //double oldCourseGrade = this.CourseGrade; // Store previous course grade for reference
@@ -401,7 +403,7 @@ namespace MarkMaster.Data
                 // If filtered result set is empty, avoid zero division error (NaN result!)
                 if (itemsNonZeroWeight.Count() == 0)
                 {
-                    this.CourseGrade = (Double) 0;
+                    this.CourseGrade = (Double)(-1.0);
                 }
                 else
                 {
@@ -421,7 +423,7 @@ namespace MarkMaster.Data
     public class GradesDataSource : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        
+
         private int _autoUniqueID = 0; // Private field to maintain next auto-incrementing ID
         private double _sessionalGrade;  // Private field to maintain current sessional average
         private double _sessionalGradeTwelve; // Sessional average in twelve-point McMaster scale
@@ -449,7 +451,7 @@ namespace MarkMaster.Data
             }
             set
             {
-                if (SetProperty<int>(ref _autoUniqueID, value)) {}
+                if (SetProperty<int>(ref _autoUniqueID, value)) { }
             }
         }
 
@@ -569,7 +571,7 @@ namespace MarkMaster.Data
 
             string jsonString = await JsonConvert.SerializeObjectAsync(_gradesDataSource);
             await FileIO.WriteTextAsync(file, jsonString);
-            
+
             // Determine success based on file availability
             return file.IsAvailable;
 
@@ -607,33 +609,34 @@ namespace MarkMaster.Data
         public static string CreateNewItem(string courseUniqueID)
         {
             // Set default weight to be remainder of total weight for course (i.e. 100 - sum of existing item weights)
-            double defaultItemWeight = 100 - _gradesDataSource.Groups.Where(course => 
+            double defaultItemWeight = 100 - _gradesDataSource.Groups.Where(course =>
                 course.UniqueId == courseUniqueID).FirstOrDefault().Items.Select(item => item.ItemWeight).Sum();
-            if (defaultItemWeight < 0) {
+            if (defaultItemWeight < 0)
+            {
                 defaultItemWeight = 0;
             }
 
             int itemUniqueID = _gradesDataSource._autoUniqueID++;
             GradesDataItem newItem = new GradesDataItem(
                 (itemUniqueID).ToString(),
-                (string) Application.Current.Resources["DefaultItemName"],
-                (string) Application.Current.Resources["DefaultItemImagePath"],
-                (string) Application.Current.Resources["DefaultItemType"],
-                (double) Application.Current.Resources["DefaultItemGrade"],
+                (string)Application.Current.Resources["DefaultItemName"],
+                (string)Application.Current.Resources["DefaultItemImagePath"],
+                (string)Application.Current.Resources["DefaultItemType"],
+                (double)Application.Current.Resources["DefaultItemGrade"],
                 //(double) Application.Current.Resources["DefaultItemWeight"]
                 defaultItemWeight,
-                (bool) Application.Current.Resources["DefaultHasItemGrade"],
-                (double) Application.Current.Resources["DefaultItemRequiredGrade"]
+                (bool)Application.Current.Resources["DefaultHasItemGrade"],
+                (double)Application.Current.Resources["DefaultItemRequiredGrade"]
                 );
 
-            ((GradesDataGroup) _gradesDataSource.Groups.Where(course => course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Add(newItem);
+            ((GradesDataGroup)_gradesDataSource.Groups.Where(course => course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Add(newItem);
             return itemUniqueID.ToString();
         }
 
         // Static method to delete a course item (from a specific course); returns true if completed successfully
         public static bool RemoveItem(string courseUniqueID, GradesDataItem targetItem)
         {
-            return ((GradesDataGroup)_gradesDataSource.Groups.Where(course => 
+            return ((GradesDataGroup)_gradesDataSource.Groups.Where(course =>
                 course.UniqueId == courseUniqueID).FirstOrDefault()).Items.Remove(targetItem);
         }
 
@@ -642,7 +645,7 @@ namespace MarkMaster.Data
         {
             return _gradesDataSource.Groups.Remove(targetCourse);
         }
-        
+
         // Static method to delete multiple courses; true if all complete successfully
         public static bool RemoveCourses(List<object> targetCourses)
         {
@@ -660,8 +663,8 @@ namespace MarkMaster.Data
         {
             int courseUniqueID = _gradesDataSource._autoUniqueID++;
             McMasterCourse newMacCourse = new McMasterCourse(
-                (string) Application.Current.Resources["DefaultDepartmentName"],
-                (string) Application.Current.Resources["DefaultCourseCode"]);
+                (string)Application.Current.Resources["DefaultDepartmentName"],
+                (string)Application.Current.Resources["DefaultCourseCode"]);
 
 
             GradesDataGroup group = new GradesDataGroup(
@@ -684,18 +687,12 @@ namespace MarkMaster.Data
         // Static method to re-evaluate sessional average over all courses for grades data source object
         public static void RecalculateSessionalGrade()
         {
-            //// First, update total number of units
-            //_gradesDataSource.SessionalUnits = (UInt16) _gradesDataSource.Groups.Select(course => (double)course.CourseUnits).Sum();
-            //// Retrieve sessional grade via dot product of units * grades (all courses), divided by total of units
-            //_gradesDataSource.SessionalGrade = _gradesDataSource.Groups.Select(course => course.CourseUnits * course.CourseGrade).Sum() /
-            //    (double) _gradesDataSource.SessionalUnits;
-
             // Reset the accumulators
-            _gradesDataSource.SessionalUnits = 0; 
+            _gradesDataSource.SessionalUnits = 0;
             _gradesDataSource.SessionalGrade = 0;
             _gradesDataSource.SessionalGradeFour = 0;
             _gradesDataSource.SessionalGradeTwelve = 0;
-            foreach (GradesDataGroup course in _gradesDataSource.Groups)
+            foreach (GradesDataGroup course in _gradesDataSource.Groups.Where(course => (course.Items.Where(item => item.HasItemGrade).Count() != 0)))
             {
                 _gradesDataSource.SessionalUnits += course.CourseUnits;
                 _gradesDataSource.SessionalGrade += course.CourseGrade * course.CourseUnits;
@@ -704,7 +701,7 @@ namespace MarkMaster.Data
                 _gradesDataSource.SessionalGradeTwelve +=
                     gradeScaleConverter.PercentageToGradeScale(course.CourseGrade, "Twelve") * course.CourseUnits;
             }
-            
+
             // Avoid divide by zero issues (i.e. NaN results) - just default to 0 for now
             if (_gradesDataSource.SessionalUnits == 0)
             {

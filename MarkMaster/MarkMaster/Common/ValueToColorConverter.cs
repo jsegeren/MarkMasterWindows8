@@ -19,7 +19,7 @@ namespace MarkMaster.Common
             double thresholdValue;
             Double.TryParse((string)parameter, out thresholdValue);
 
-            return ((double) value > thresholdValue) ? "#FFB48417" : "#5F37BE";
+            return ((double)value > thresholdValue) ? "#FFB48417" : "#5F37BE";
         }
 
         public object ConvertBack(object value, Type typeName, object parameter, string language)

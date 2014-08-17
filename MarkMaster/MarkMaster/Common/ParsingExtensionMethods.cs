@@ -33,11 +33,8 @@ namespace MarkMaster.Common
         {
             var returnList = new List<string>();
 
-            //var returnList = [];
-
             int totalLength = target.Length;
             int currentPoint = 0;
-            //int endPoint;
 
             var workingString = target;
             var workingStringLength = workingString.Length;
@@ -48,7 +45,7 @@ namespace MarkMaster.Common
                 workingString = workingString.Substring(currentPoint);
 
 
-                if (workingString.Length < startMarker.Length) // || workingString.Length < endMarkers.Length)
+                if (workingString.Length < startMarker.Length)
                 {
                     break;
                 }

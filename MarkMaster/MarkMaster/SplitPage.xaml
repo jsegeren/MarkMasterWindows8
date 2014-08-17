@@ -108,7 +108,6 @@
                               SelectionChanged="courseCodeEdit_SelectionChanged"
                               DropDownClosed="courseCode_SelectionMade"
                               FontSize="25" SelectedValue="{Binding CourseCode, Mode=TwoWay}"/>
-                    <!--<ab:AutoCompleteBox x:Name="courseCodeEdit" Margin="0,0,10,0" Width="250" Height="40" Visibility="Visible" />-->
                     <TextBox x:Name="courseCodeEdit2" Width="90" Height="40" Visibility="Collapsed" VerticalAlignment="Center" VerticalContentAlignment="Center"
                              InputScope="AlphanumericHalfWidth" MaxLength="4" Background="{x:Null}" Foreground="White" FontSize="25" 
                              Text="{Binding CourseCode, Mode=TwoWay}"/>
@@ -160,17 +159,6 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel x:Name="courseGradePanel" Grid.Row="0" Grid.ColumnSpan="2" Margin="30,50,0,10" Orientation="Horizontal" 
                             HorizontalAlignment="Left">
-                    <!--<TextBox x:Name="courseGradeFake" Text="{Binding CourseGrade, 
-                                Converter={StaticResource StringConverter}, 
-                                ConverterParameter=\{0:0.00\}, UpdateSourceTrigger=PropertyChanged}"
-                             Opacity="0" Height="0" Width="0" >
-                        <Interactivity:Interaction.Behaviors>
-                            <Core:EventTriggerBehavior EventName="TextChanged">
-                                <Media:ControlStoryboardAction Storyboard="{StaticResource Crossfade}"/>
-                            </Core:EventTriggerBehavior>
-                        </Interactivity:Interaction.Behaviors>
-                    </TextBox>-->
-                             
                     <TextBlock x:Name="courseGrade" Text="{Binding CourseGrade, 
                                 Converter={StaticResource StringConverter}, 
                                 ConverterParameter=\{0:0.00\}}" Style="{StaticResource SubheaderTextBlockStyle}" FontSize="100" FontWeight="Light">
@@ -203,12 +191,6 @@
                                Text="Four-Point Scale" Style="{StaticResource SubtitleTextBlockStyle}"/>
                 </StackPanel>
             </Grid>
-
-
-            <!--<StackPanel Grid.Row="2" x:Name="buttonPanel" Orientation="Horizontal" Margin="30,10,10,10" VerticalAlignment="Stretch">
-                <Button x:Name="ButtonEditFields" Content="Edit Course Info" HorizontalAlignment="Center"
-                        Click="OnEditFieldsClick" />
-            </StackPanel>-->
         </Grid>
 
         <!-- Vertical scrolling item list -->
@@ -309,9 +291,6 @@
                     <TextBlock x:Name="itemSubtitleLabel" Margin="0,20,0,5" Text="Item Type" Style="{StaticResource SubtitleTextBlockStyle}"/>
                     <TextBlock x:Name="itemSubtitle" Margin="0,0,0,0" Text="{Binding ItemType}" Style="{StaticResource SubheaderTextBlockStyle}" 
                                FontSize="25" Tapped="itemSubtitle_Tapped" />
-                    <!--<TextBox x:Name="itemSubtitleEdit" Margin="0,10,0,10" Text="{Binding ItemType, Mode=TwoWay}" Visibility="Collapsed"
-                             Background="{x:Null}" Foreground="White" FontSize="20"
-                             GotFocus="OnTextBoxFocus" LostFocus="itemSubtitleEdit_LostFocus" KeyDown="AlphaEditBox_KeyDown"/>-->
                     <ComboBox x:Name="itemSubtitleEditCombo" SelectedValue="{Binding ItemType, Mode=TwoWay}" Margin="0,10,0,10" Height="40" 
                               Visibility="Collapsed" Background="{x:Null}" Foreground="White" FontSize="20" DropDownClosed="comboBox_SelectionMade" />
                 </StackPanel>
@@ -364,7 +343,7 @@
                                  GotFocus="OnTextBoxFocus" LostFocus="itemGradeValueEdit_LostFocus"/>
                         </StackPanel>
                     </StackPanel>
-                        <CheckBox Margin="0,25,60,0"  Grid.Column="1" x:Name="itemGradeCheckbox" VerticalAlignment="Center" HorizontalAlignment="Right" IsChecked="{Binding HasItemGrade, Mode=TwoWay}"
+                    <CheckBox Margin="0,25,60,0"  Grid.Column="1" x:Name="itemGradeCheckbox" VerticalAlignment="Center" HorizontalAlignment="Right" IsChecked="{Binding HasItemGrade, Mode=TwoWay}"
                                   Unchecked="itemGradeCheckbox_Unchecked" Checked="itemGradeCheckbox_Checked"/>
                 </Grid>
                 <Slider Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="3"
@@ -376,67 +355,8 @@
                                Style="{StaticResource TitleTextBlockStyle}" Foreground="#FFB48417" IsTextSelectionEnabled="False"
                                Visibility="Visible"/>
                 </StackPanel>
-
             </Grid>
         </ScrollViewer>
-        <!--<VisualStateManager.VisualStateGroups>
-            -->
-        <!-- Visual states reflect the application's view state -->
-        <!--
-            <VisualStateGroup x:Name="ViewStates">
-                <VisualState x:Name="PrimaryView" />
-                <VisualState x:Name="SinglePane">
-                    <Storyboard>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="firstColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="*"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="thirdColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemDetail" Storyboard.TargetProperty="Visibility">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemListView" Storyboard.TargetProperty="Padding">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="120,0,90,60"/>
-                        </ObjectAnimationUsingKeyFrames>
-                    </Storyboard>
-                </VisualState>
-                -->
-        <!--
-                    When an item is selected and only one pane is shown the details display requires more extensive changes:
-                     * Hide the master list and the column it was in
-                     * Move item details down a row to make room for the title
-                     * Move the title directly above the details
-                     * Adjust padding for details
-                 -->
-        <!--
-                <VisualState x:Name="SinglePane_Detail">
-                    <Storyboard>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="firstColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemListView" Storyboard.TargetProperty="Visibility">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemDetail" Storyboard.TargetProperty="(Grid.Row)">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="1"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemDetail" Storyboard.TargetProperty="(Grid.RowSpan)">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="1"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titlePanel" Storyboard.TargetProperty="(Grid.Column)">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="1"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemDetailGrid" Storyboard.TargetProperty="Margin">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="0,0,0,60"/>
-                        </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="itemDetail" Storyboard.TargetProperty="Padding">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="120,0,90,0"/>
-                        </ObjectAnimationUsingKeyFrames>
-                    </Storyboard>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>-->
     </Grid>
 
     <Page.BottomAppBar>
@@ -444,7 +364,6 @@
             <StackPanel Orientation="Horizontal">
                 <AppBarButton Label="Add Item" Icon="Add" Click="OnAddItemClick"/>
                 <AppBarButton Label="Remove Item" Icon="Remove" Click="OnRemoveItemClick"/>
-                <!--<AppBarToggleButton x:Name="editFieldsButton" Label="Edit Fields" Icon="Edit" Click="OnEditFieldsClick"/>-->
             </StackPanel>
         </AppBar>
     </Page.BottomAppBar>

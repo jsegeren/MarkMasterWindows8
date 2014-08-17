@@ -28,9 +28,9 @@ using Windows.Web.Http;
 
 namespace MarkMaster
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
+    //<summary>
+    //Provides application-specific behavior to supplement the default Application class.
+    //</summary>
     sealed partial class App : Application
     {
 
@@ -62,11 +62,9 @@ namespace MarkMaster
             }
         }
 
-        /**
-         * Method to manually retrieve course data from the McMaster registar website directly.
-         * Falls back to use information from bundled asset (cached course info) if no internet
-         * connection available.
-         **/
+        // Method to manually retrieve course data from the McMaster registar website directly.
+        // Falls back to use information from bundled asset (cached course info) if no internet
+        // connection available.
         private async void RetrieveCourseData()
         {
             DepartmentToCoursesMap = new Dictionary<string, HashSet<McMasterCourse>>();
@@ -84,7 +82,7 @@ namespace MarkMaster
                     responseString = await httpResponse.Content.ReadAsStringAsync();
                 }
             }
-                // Fails for example, if no internet connection available
+            // Fails for example, if no internet connection available
             catch (Exception e)
             {
                 Debug.WriteLine(e);
@@ -108,7 +106,7 @@ namespace MarkMaster
             if (responseString != null)
             {
                 // Now parse the raw HTML
-                IList<String> departmentDataList = responseString.FindElements("<p>&nbsp;</p>", 
+                IList<String> departmentDataList = responseString.FindElements("<p>&nbsp;</p>",
                     new List<String>() { "</table></td></tr><tr><td class=label colspan=10>" });
                 foreach (String departmentData in departmentDataList)
                 {
@@ -120,11 +118,11 @@ namespace MarkMaster
                         String courseCode = courseMetaList[1].Trim();
                         String courseName = courseMetaList[3].Trim();
                         McMasterCourse newCourse = new McMasterCourse(departmentName, courseCode);
-                        
+
                         // Update the department -> courses map
                         if (!DepartmentToCoursesMap.ContainsKey(departmentName))
                         {
-                            DepartmentToCoursesMap.Add(departmentName, new HashSet<McMasterCourse>(){ newCourse });
+                            DepartmentToCoursesMap.Add(departmentName, new HashSet<McMasterCourse>() { newCourse });
                         }
                         else
                         {
@@ -137,18 +135,6 @@ namespace MarkMaster
                         {
                             CourseToNameMap.Add(newCourse, courseName);
                         }
-
-                        //IList<String> elementList = course.FindElements("<td", new List<string>() { "</td>" });
-                        //foreach (String element in elementList)
-                        //{
-                        //    string[] elementContentList = element.Split(new string[] { ">" }, StringSplitOptions.RemoveEmptyEntries);
-                        //    if (elementContentList.Length > 1) {
-                        //        elementContentList[1].ToString();
-                        //    }
-                        //    element.ToString();
-                            //Regex regex = new Regex(@".[>]")
-                            //Regex regex = new Regex(@"\s\d[A-Z]\w\d$", RegexOptions.IgnoreCase);
-                        //}
                     }
                 }
 
@@ -157,31 +143,6 @@ namespace MarkMaster
             int x = DepartmentToCoursesMap.Count;
             int y = CourseToNameMap.Count;
         }
-
-        //private async void RetrieveCourseData()
-        //{
-        //    // First retrieve the JSON from the timetable generating website (credits to TODO who?)
-        //    HttpClient hyperTextClient = new HttpClient();
-        //    Uri courseDataURL = new Uri("http://www.timetablegenerator.com/data/mcmaster_data.json");
-        //    HttpResponseMessage hyperTextResponse = await hyperTextClient.GetAsync(courseDataURL);
-
-        //    if (hyperTextResponse.StatusCode == HttpStatusCode.Ok)
-        //    {
-        //        CourseJSONData = await hyperTextResponse.Content.ReadAsStringAsync();
-
-        //        // Then parse the JSON response dynamically (i.e. without declaring classes)
-        //        dynamic resultItem = JsonConvert.DeserializeObject(CourseJSONData);
-        //        Debug.WriteLine("First course: {0}", resultItem.courses[0].ToString());
-        //    }
-        //    else
-        //    {
-        //        throw new Exception(hyperTextResponse.StatusCode.ToString() + " " + hyperTextResponse.ReasonPhrase);
-        //    }
-
-        //    return;
-
-        //}
-
 
         /// <summary>
         /// Initializes the singleton Application object.  This is the first line of authored code
@@ -212,7 +173,6 @@ namespace MarkMaster
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
-
             if (rootFrame == null)
             {
                 // Create a Frame to act as the navigation context and navigate to the first page
@@ -253,7 +213,6 @@ namespace MarkMaster
             Window.Current.Activate();
 
             // Perform initial course data retrieval / parsing
-            // TODO fix and finish implementing this
             RetrieveCourseData();
         }
 
@@ -267,7 +226,7 @@ namespace MarkMaster
         private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            
+
             // First, make sure grades data is properly serialized, saved
             await GradesDataSource.SaveDataSourceAsync();
 

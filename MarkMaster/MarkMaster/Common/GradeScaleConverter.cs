@@ -45,7 +45,6 @@ namespace MarkMaster.Common
             { 0, 0 }
         };
 
-        // 
         public double PercentageToGradeScale(double value, string inputParameter)
         {
             int roundedPercentageGrade = (int)Math.Round((double)value, 0);
@@ -68,7 +67,7 @@ namespace MarkMaster.Common
             object parameter, string language)
         {
             // Retrieve the format string and use it to format the value
-            return PercentageToGradeScale((double) value, (string) parameter).ToString();
+            return PercentageToGradeScale((double)value, (string)parameter).ToString();
 
         }
         // No need to implement converting back on a one-way binding 
