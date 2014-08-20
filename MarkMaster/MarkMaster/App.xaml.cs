@@ -67,10 +67,23 @@ namespace MarkMaster
         // connection available.
         private async void RetrieveCourseData()
         {
-            DepartmentToCoursesMap = new Dictionary<string, HashSet<McMasterCourse>>();
-            CourseToNameMap = new Dictionary<McMasterCourse, string>();
             String responseString = null;
 
+            // First populate the course options with the cached version; retrieving current content
+            // could take some time, and we don't want to unnecessarily delay things for the user
+            try
+            {
+                var registrarDataFile =
+                    await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync((string)Application.Current.Resources["McMasterRegistarDataAssetPath"]);
+                responseString = await FileIO.ReadTextAsync(registrarDataFile);
+                ParseRawHTML(responseString);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+
+            // Now actually update the content from the live source 
             try
             {
                 HttpClient httpClient = new HttpClient();
@@ -80,6 +93,7 @@ namespace MarkMaster
                 if (httpResponse.StatusCode == HttpStatusCode.Ok)
                 {
                     responseString = await httpResponse.Content.ReadAsStringAsync();
+                    ParseRawHTML(responseString);
                 }
             }
             // Fails for example, if no internet connection available
@@ -87,61 +101,47 @@ namespace MarkMaster
             {
                 Debug.WriteLine(e);
             }
+        }
 
-            // Retrieve the stored course data (fallback)
-            if (responseString == null)
-            {
-                try
-                {
-                    var registrarDataFile =
-                        await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync((string)Application.Current.Resources["McMasterRegistarDataAssetPath"]);
-                    responseString = await FileIO.ReadTextAsync(registrarDataFile);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(e);
-                }
-            }
+        private void ParseRawHTML(String responseString)
+        {
+            // Reset the maps -> this function is expected to execute fast enough
+            // for the empty maps to not be a problem
+            DepartmentToCoursesMap = new Dictionary<string, HashSet<McMasterCourse>>();
+            CourseToNameMap = new Dictionary<McMasterCourse, string>();
 
-            if (responseString != null)
+            // Now parse the raw HTML
+            IList<String> departmentDataList = responseString.FindElements("<p>&nbsp;</p>",
+                new List<String>() { "</table></td></tr><tr><td class=label colspan=10>" });
+            foreach (String departmentData in departmentDataList)
             {
-                // Now parse the raw HTML
-                IList<String> departmentDataList = responseString.FindElements("<p>&nbsp;</p>",
-                    new List<String>() { "</table></td></tr><tr><td class=label colspan=10>" });
-                foreach (String departmentData in departmentDataList)
+                String departmentName = departmentData.Split(new string[] { "</td>" }, StringSplitOptions.RemoveEmptyEntries)[0].Trim();
+                IList<String> courseDataList = departmentData.FindElements("<td", new List<String>() { "</table></td></tr><tr>" });
+                foreach (String courseData in courseDataList)
                 {
-                    String departmentName = departmentData.Split(new string[] { "</td>" }, StringSplitOptions.RemoveEmptyEntries)[0].Trim();
-                    IList<String> courseDataList = departmentData.FindElements("<td", new List<String>() { "</table></td></tr><tr>" });
-                    foreach (String courseData in courseDataList)
+                    string[] courseMetaList = courseData.Split(new string[] { "&nbsp;" }, StringSplitOptions.RemoveEmptyEntries);
+                    String courseCode = courseMetaList[1].Trim();
+                    String courseName = courseMetaList[3].Trim();
+                    McMasterCourse newCourse = new McMasterCourse(departmentName, courseCode);
+
+                    // Update the department -> courses map
+                    if (!DepartmentToCoursesMap.ContainsKey(departmentName))
                     {
-                        string[] courseMetaList = courseData.Split(new string[] { "&nbsp;" }, StringSplitOptions.RemoveEmptyEntries);
-                        String courseCode = courseMetaList[1].Trim();
-                        String courseName = courseMetaList[3].Trim();
-                        McMasterCourse newCourse = new McMasterCourse(departmentName, courseCode);
+                        DepartmentToCoursesMap.Add(departmentName, new HashSet<McMasterCourse>() { newCourse });
+                    }
+                    else
+                    {
+                        DepartmentToCoursesMap[departmentName].Add(newCourse);
+                    }
 
-                        // Update the department -> courses map
-                        if (!DepartmentToCoursesMap.ContainsKey(departmentName))
-                        {
-                            DepartmentToCoursesMap.Add(departmentName, new HashSet<McMasterCourse>() { newCourse });
-                        }
-                        else
-                        {
-                            DepartmentToCoursesMap[departmentName].Add(newCourse);
-                        }
-
-                        // Update the course -> course name map
-                        // Note: we are assuming that the first name associated with a course is correct (i.e. that there is no conflict)
-                        if (!CourseToNameMap.ContainsKey(newCourse))
-                        {
-                            CourseToNameMap.Add(newCourse, courseName);
-                        }
+                    // Update the course -> course name map
+                    // Note: we are assuming that the first name associated with a course is correct (i.e. that there is no conflict)
+                    if (!CourseToNameMap.ContainsKey(newCourse))
+                    {
+                        CourseToNameMap.Add(newCourse, courseName);
                     }
                 }
-
             }
-
-            int x = DepartmentToCoursesMap.Count;
-            int y = CourseToNameMap.Count;
         }
 
         /// <summary>
